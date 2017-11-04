@@ -3,13 +3,7 @@ package asymmetricserver;
 import asymmetricclient.AsymmetricClient;
 import crypto.RSA;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
+import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.security.PrivateKey;
@@ -21,17 +15,19 @@ import java.util.logging.Logger;
 
 public class AsymmetricServer {
 
-    private static final String PATH_OF_PRIVATE_KEY = "D:\\Server\\MyPrivateKey";
-    private static final String PATH_OF_PUBLIC_KEY = "D:\\Server\\MyPublicKey";
+    private static final String cwd = System.getProperty("user.dir");
+    private static final String PATH_OF_PRIVATE_KEY = String.join(File.separator, cwd, "asymmetricserver", "MyPrivateKey");
+    private static final String PATH_OF_PUBLIC_KEY = String.join(File.separator, cwd, "asymmetricserver", "MyPublicKey");
+    private static final int port = 1234;
 
     public static void main(String[] args) {
         try {
             // Generating keys and definig a server socket.
             RSA rsa = new RSA();
             rsa.generateKeys(PATH_OF_PRIVATE_KEY, PATH_OF_PUBLIC_KEY);
-            int port = 1234;
             ServerSocket welcomeSocket = new ServerSocket(port);
             System.out.println("server is running on port " + port);
+            System.out.println(PATH_OF_PRIVATE_KEY);
 
             System.out.println("new Client Generated");
             ExecutorService executor = Executors.newFixedThreadPool(5);
