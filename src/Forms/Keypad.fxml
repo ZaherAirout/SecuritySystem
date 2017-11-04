@@ -1,45 +1,49 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import java.lang.*?>
-<?import java.util.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
-<?import javafx.scene.paint.*?>
-<?import javafx.scene.text.*?>
-
-<fx:root type="javafx.scene.layout.VBox" id="VBox" alignment="CENTER" focusTraversable="false" spacing="5.0" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/2.2" fx:controller="Forms.KeypadController">
-  <children>
+<?import javafx.scene.text.Font?>
+<fx:root type="javafx.scene.layout.VBox" id="VBox" alignment="CENTER" spacing="5.0" xmlns:fx="http://javafx.com/fxml/1"
+         xmlns="http://javafx.com/javafx/2.2" fx:controller="Forms.KeypadController">
     <GridPane id="GridPane" prefHeight="212.0" prefWidth="225.0">
-      <children>
+        <columnConstraints>
+            <ColumnConstraints halignment="CENTER" hgrow="SOMETIMES" minWidth="10.0"/>
+            <ColumnConstraints halignment="CENTER" hgrow="SOMETIMES" minWidth="10.0"/>
+            <ColumnConstraints halignment="CENTER" hgrow="SOMETIMES" minWidth="10.0"/>
+        </columnConstraints>
+        <rowConstraints>
+            <RowConstraints minHeight="10.0" vgrow="SOMETIMES"/>
+            <RowConstraints minHeight="10.0" vgrow="SOMETIMES"/>
+            <RowConstraints minHeight="10.0" vgrow="SOMETIMES"/>
+            <RowConstraints minHeight="10.0" vgrow="SOMETIMES"/>
+        </rowConstraints>
         <Button mnemonicParsing="false" onAction="#keyPressed" text="1" GridPane.columnIndex="0" GridPane.rowIndex="0">
-          <font>
-            <Font size="26.0" fx:id="x1" />
-          </font>
+            <font>
+                <Font size="26.0" fx:id="x1"/>
+            </font>
         </Button>
-        <Button font="$x1" mnemonicParsing="false" onAction="#keyPressed" text="2" GridPane.columnIndex="1" GridPane.rowIndex="0" />
-        <Button font="$x1" mnemonicParsing="false" onAction="#keyPressed" text="3" GridPane.columnIndex="2" GridPane.rowIndex="0" />
-        <Button font="$x1" mnemonicParsing="false" onAction="#keyPressed" text="4" GridPane.columnIndex="0" GridPane.rowIndex="1" />
-        <Button font="$x1" mnemonicParsing="false" onAction="#keyPressed" text="5" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-        <Button font="$x1" mnemonicParsing="false" onAction="#keyPressed" text="6" GridPane.columnIndex="2" GridPane.rowIndex="1" />
-        <Button font="$x1" mnemonicParsing="false" onAction="#keyPressed" text="7" GridPane.columnIndex="0" GridPane.rowIndex="2" />
-        <Button font="$x1" mnemonicParsing="false" onAction="#keyPressed" text="8" GridPane.columnIndex="1" GridPane.rowIndex="2" />
-        <Button font="$x1" mnemonicParsing="false" onAction="#keyPressed" text="9" GridPane.columnIndex="2" GridPane.rowIndex="2" />
-        <Button fx:id="del" mnemonicParsing="false" onAction="#keyPressed" text="Del" GridPane.columnIndex="0" GridPane.rowIndex="3" />
-        <Button font="$x1" mnemonicParsing="false" onAction="#keyPressed" text="0" GridPane.columnIndex="1" GridPane.rowIndex="3" />
-        <Button fx:id="ok" mnemonicParsing="false" onAction="#keyPressed" text="OK" GridPane.columnIndex="2" GridPane.rowIndex="3" />
-      </children>
-      <columnConstraints>
-        <ColumnConstraints halignment="CENTER" hgrow="SOMETIMES" minWidth="10.0" />
-        <ColumnConstraints halignment="CENTER" hgrow="SOMETIMES" minWidth="10.0" />
-        <ColumnConstraints halignment="CENTER" hgrow="SOMETIMES" minWidth="10.0" />
-      </columnConstraints>
-      <rowConstraints>
-        <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
-        <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
-        <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
-        <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
-      </rowConstraints>
+        <Button font="$x1" mnemonicParsing="false" onAction="#keyPressed" text="2" GridPane.columnIndex="1"
+                GridPane.rowIndex="0"/>
+        <Button font="$x1" mnemonicParsing="false" onAction="#keyPressed" text="3" GridPane.columnIndex="2"
+                GridPane.rowIndex="0"/>
+        <Button font="$x1" mnemonicParsing="false" onAction="#keyPressed" text="4" GridPane.columnIndex="0"
+                GridPane.rowIndex="1"/>
+        <Button font="$x1" mnemonicParsing="false" onAction="#keyPressed" text="5" GridPane.columnIndex="1"
+                GridPane.rowIndex="1"/>
+        <Button font="$x1" mnemonicParsing="false" onAction="#keyPressed" text="6" GridPane.columnIndex="2"
+                GridPane.rowIndex="1"/>
+        <Button font="$x1" mnemonicParsing="false" onAction="#keyPressed" text="7" GridPane.columnIndex="0"
+                GridPane.rowIndex="2"/>
+        <Button font="$x1" mnemonicParsing="false" onAction="#keyPressed" text="8" GridPane.columnIndex="1"
+                GridPane.rowIndex="2"/>
+        <Button font="$x1" mnemonicParsing="false" onAction="#keyPressed" text="9" GridPane.columnIndex="2"
+                GridPane.rowIndex="2"/>
+        <Button fx:id="del" mnemonicParsing="false" onAction="#keyPressed" text="Del" GridPane.columnIndex="0"
+                GridPane.rowIndex="3"/>
+        <Button font="$x1" mnemonicParsing="false" onAction="#keyPressed" text="0" GridPane.columnIndex="1"
+                GridPane.rowIndex="3"/>
+        <Button fx:id="ok" mnemonicParsing="false" onAction="#keyPressed" text="OK" GridPane.columnIndex="2"
+                GridPane.rowIndex="3"/>
     </GridPane>
-    <PasswordField id="password" fx:id="display" alignment="CENTER" prefHeight="41.0" prefWidth="194.0" />
-  </children>
+    <PasswordField id="password" fx:id="display" alignment="CENTER" prefHeight="41.0" prefWidth="194.0"/>
 </fx:root>
