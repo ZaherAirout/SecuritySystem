@@ -95,6 +95,22 @@ public class FileManager {
         return file;
     }
 
+    public void writeFile(EncryptedFile encryptedFile, String path) {
+        FileOutputStream fout = null;
+        try {
+            fout = new FileOutputStream(path + encryptedFile.fileName);
+            ObjectOutputStream oos = null;
+            try {
+                oos = new ObjectOutputStream(fout);
+                oos.writeObject(encryptedFile);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+
+    }
 
     // returns instance of FileManager singleton class.
     public static FileManager getInstance() {
@@ -109,7 +125,23 @@ public class FileManager {
         }
     }
 
-    public void clearTemp() {
+    static void deleteFolder(File folder) {
+        File[] files = folder.listFiles();
+        if (files != null) { //some JVMs return null for empty dirs
+            for (File f : files) {
+                if (f.isDirectory()) {
+                    deleteFolder(f);
+                } else {
+                    f.delete();
+                }
+            }
+        }
+        folder.delete();
+    }
 
+    public void clearTemp() {
+        File temp = new File(TEMP);
+        deleteFolder(temp);
+        temp.mkdir();
     }
 }
