@@ -1,5 +1,6 @@
 package asymmetricserver;
 
+import Misc.FileManager;
 import asymmetricclient.AsymmetricClient;
 import crypto.RSA;
 
@@ -21,6 +22,17 @@ public class AsymmetricServer {
     private static final int port = 1234;
 
     public static void main(String[] args) {
+        if (true) {
+            FileManager fileManager = new FileManager();
+            String fileName = "C:\\Users\\ZaherAirout\\Pictures\\20170130_080919.jpg";
+            fileManager.openFile(new File(fileName));
+            String a = "test";
+            String b = "test";
+            System.out.println(a == b);
+//            fileManager.writeFile(fileName, fileManager.readFile(fileName));
+            System.out.println("Fin");
+            return;
+        }
         try {
             // Generating keys and definig a server socket.
             RSA rsa = new RSA();
