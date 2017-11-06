@@ -1,39 +1,11 @@
 package asymmetricserver;
 
-import Protocol.Client;
-import Protocol.ServerHandler;
-import asymmetricclient.AsymmetricClient;
-
-import java.io.File;
 import java.io.IOException;
-import java.net.ServerSocket;
-import java.net.Socket;
-import java.util.HashMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 public class AsymmetricServer {
 
-    private static final String cwd = System.getProperty("user.dir");
-    public static final String PATH_OF_PRIVATE_KEY = String.join(File.separator, cwd, "asymmetricserver", "MyPrivateKey");
-    public static final String PATH_OF_PUBLIC_KEY = String.join(File.separator, cwd, "asymmetricserver", "MyPublicKey");
-    private static final int port = 1234;
-
     public static void main(String[] args) throws IOException, ClassNotFoundException, InterruptedException {
-        ServerSocket serverSocket = new ServerSocket(port);
-//        Socket socket = serverSocket.accept();
 
-        HashMap<Client, Socket> clients = new HashMap<>();
-
-        ExecutorService executor = Executors.newFixedThreadPool(5);
-
-        AsymmetricClient asymmetricClient = new AsymmetricClient(new Client("Ahmed", "localhost", null));
-        executor.execute(asymmetricClient);
-
-
-        Socket socket1 = serverSocket.accept();
-        ServerHandler handler1 = new ServerHandler(clients, socket1);
-        executor.execute(handler1);
 //        Thread.sleep(2000);
 //
 //        AsymmetricClient asymmetricClient2 = new AsymmetricClient(new Client("Nour", "localhost", null));

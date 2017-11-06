@@ -2,7 +2,7 @@
 
 <?scenebuilder-classpath-element ../../dist/UnlockCustom.jar?>
 
-<?import asymmetricserver.Forms.Server?>
+<?import asymmetricserver.Server?>
 <?import Forms.Keypad?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.image.Image?>
@@ -16,7 +16,6 @@
             prefWidth="600.0" xmlns="http://javafx.com/javafx/2.2"
             fx:controller="Forms.UnlockController">
     <children>
-        <Server fx:id="server" layoutX="187.0" layoutY="68.0" />
         <Rectangle fx:id="okleft" arcHeight="5.0" arcWidth="5.0" fill="DODGERBLUE" height="400.0" stroke="BLACK"
                    strokeType="INSIDE" styleClass="unlock-leftright" width="300.0"/>
         <Rectangle fx:id="okright" arcHeight="5.0" arcWidth="5.0" fill="DODGERBLUE" height="400.0" stroke="BLACK"
@@ -39,6 +38,7 @@
                 </ImageView>
             </graphic>
         </Button>
+        <Server fx:id="server" visible="false"/>
     </children>
     <stylesheets>
         <URL value="@Unlock.css"/>

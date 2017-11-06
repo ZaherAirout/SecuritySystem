@@ -3,7 +3,7 @@
  */
 package Forms;
 
-import asymmetricserver.Forms.Server;
+import asymmetricserver.Server;
 import javafx.animation.FadeTransition;
 import javafx.animation.ParallelTransition;
 import javafx.animation.SequentialTransition;
@@ -55,6 +55,19 @@ public final class UnlockController {
         final FadeTransition fadeOut = new FadeTransition(duration, node);
         fadeOut.setFromValue(1);
         fadeOut.setToValue(0);
+        fadeOut.setOnFinished(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent arg0) {
+                node.setVisible(false);
+            }
+        });
+        return fadeOut;
+    }
+
+    private FadeTransition fadeIn(final Duration duration, final Node node) {
+        final FadeTransition fadeOut = new FadeTransition(duration, node);
+        fadeOut.setFromValue(0);
+        fadeOut.setToValue(1);
         fadeOut.setOnFinished(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent arg0) {
@@ -169,16 +182,9 @@ public final class UnlockController {
         okTrans.setOnFinished(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent arg0) {
-                server.setDisable(false);
-                server.setVisible(true);
-                server.setOpacity(1.0);
-                unlockbottom.setVisible(false);
-                unlocktop.setVisible(false);
-                pad.setVisible(false);
-                okleft.setVisible(false);
-                okright.setVisible(false);
+                open = true;
                 root.requestFocus();
-                server.requestFocus();
+                server.setVisible(true);
             }
         });
         okTrans.play();
@@ -250,6 +256,7 @@ public final class UnlockController {
         @Override
         public Boolean call(String param) {
             grantAccess();
+
             return true;
             /*final boolean accessGranted = "1234".equals(param);
             if (accessGranted) {

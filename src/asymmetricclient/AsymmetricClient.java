@@ -49,7 +49,7 @@ public class AsymmetricClient implements Runnable {
         // ProgressBar.setVisiable(false);
 
         // TODO: Remove this
-        Thread.sleep(2000);
+//        Thread.sleep(2000);
 
         socket = connector.socket;
         onlineClients = connector.clients;
@@ -91,6 +91,7 @@ public class AsymmetricClient implements Runnable {
 
     @Override
     public void run() {
+/*
 
         // send 100 messages to Ahmed PC
         for (int i = 0; i < 3; i++) {
@@ -112,6 +113,7 @@ public class AsymmetricClient implements Runnable {
 
 
         }
+*/
 
 
         /*        try {

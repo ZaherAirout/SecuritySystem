@@ -1,45 +1,48 @@
-
-
+/*
+ * Copyright (c) 2012, Oracle and/or its affiliates. All rights reserved.
+ */
 package asymmetricserver;
 
-import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
-import javafx.scene.Scene;
-import javafx.scene.layout.Pane;
-import javafx.stage.Stage;
+import javafx.scene.layout.GridPane;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.io.IOException;
 
 /**
- * Main class for the Server Custom demo.
- * This is boilerplate code:
- * Loads 'Server.fxml', adds the root node to a Scene, and set the scene
- * to the application primary stage.
- * <br>The main difference between Server demo and Server Custom demo is that
- * here the key pad is defined as a custom type named Server. From within
- * Server.fxml we refer to the key pad by its Java class name, Server.
+ * Server is a custom type which uses FXML to load its content.
  */
-public class Server extends Application {
+public class Server extends GridPane {
 
-    /**
-     * @param args the command line arguments
-     */
-    public static void main(String[] args) {
-        Application.launch(Server.class);
+    private final ServerController controller;
+
+    public Server() {
+        controller = load();
     }
 
-    @Override
-    public void start(Stage primaryStage) {
+    private ServerController load() {
+
+        final FXMLLoader loader = new FXMLLoader();
+
+        // fx:root is this node.
+        loader.setRoot(this);
+
+        // The FXMLLoader should use the class loader that loaded
+        // this class (Server).
+        loader.setClassLoader(this.getClass().getClassLoader());
+
+        // Server.fxml contains the configuration for 'this'
+        loader.setLocation(this.getClass().getResource("Server.fxml"));
+
         try {
-            String filename = "Server.fxml";
-            Pane page = (Pane) FXMLLoader.load(Server.class.getResource(filename));
-            Scene scene = new Scene(page);
-            primaryStage.setScene(scene);
-            primaryStage.setTitle("Server Custom Demo");
-            primaryStage.show();
-        } catch (Exception ex) {
-            Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, ex);
+            final Object root = loader.load();
+            assert root == this;
+        } catch (IOException ex) {
+            throw new IllegalStateException(ex);
         }
+
+        final ServerController serverController = loader.getController();
+        assert serverController != null;
+        return serverController;
     }
+
 }
