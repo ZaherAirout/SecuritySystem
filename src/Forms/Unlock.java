@@ -16,8 +16,8 @@ import javafx.stage.Stage;
  * Loads 'Unlock.fxml', adds the root node to a Scene, and set the scene
  * to the application primary stage.
  * <br>The main difference between Unlock demo and Unlock Custom demo is that
- * here the key pad is defined as a custom type named Keypad. From within
- * Unlock.fxml we refer to the key pad by its Java class name, Keypad.
+ * here the key pad is defined as a custom type named Server. From within
+ * Unlock.fxml we refer to the key pad by its Java class name, Server.
  */
 public class Unlock extends Application {
 

@@ -13,8 +13,8 @@ import javafx.scene.control.PasswordField;
 import javafx.util.Callback;
 
 /**
- * The controller for the custom Keypad component - see 'Keypad.fxml' 
- * and 'Keypad.java'.
+ * The controller for the custom Server component - see 'Server.fxml'
+ * and 'Server.java'.
  */
 public final class KeypadController implements Initializable {
             
@@ -46,6 +46,9 @@ public final class KeypadController implements Initializable {
             event.consume();
         }
     }
+    public void abc(){
+        System.out.println("keypad");
+    }
     
     private void delete() {
         display.setText(display.getText().substring(0, display.getText().length() -1));
@@ -59,9 +62,9 @@ public final class KeypadController implements Initializable {
 
     @Override // This method is called by the FXMLLoader when initialization is complete
     public void initialize(URL fxmlFileLocation, ResourceBundle resources) {
-        assert del != null : "fx:id=\"del\" was not injected: check your FXML file 'Keypad.fxml'.";
-        assert ok != null : "fx:id=\"ok\" was not injected: check your FXML file 'Keypad.fxml'.";
-        assert display != null : "fx:id=\"password\" was not injected: check your FXML file 'Keypad.fxml'.";
+        assert del != null : "fx:id=\"del\" was not injected: check your FXML file 'Server.fxml'.";
+        assert ok != null : "fx:id=\"ok\" was not injected: check your FXML file 'Server.fxml'.";
+        assert display != null : "fx:id=\"password\" was not injected: check your FXML file 'Server.fxml'.";
     }
     
     void setValidateCallback(Callback<String,Boolean> validateCB) {

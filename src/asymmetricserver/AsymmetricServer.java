@@ -1,27 +1,57 @@
 package asymmetricserver;
 
+import Protocol.Client;
+import Protocol.ServerHandler;
 import asymmetricclient.AsymmetricClient;
-import crypto.RSA;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.security.PrivateKey;
-import java.security.PublicKey;
+import java.util.HashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class AsymmetricServer {
 
     private static final String cwd = System.getProperty("user.dir");
-    private static final String PATH_OF_PRIVATE_KEY = String.join(File.separator, cwd, "asymmetricserver", "MyPrivateKey");
-    private static final String PATH_OF_PUBLIC_KEY = String.join(File.separator, cwd, "asymmetricserver", "MyPublicKey");
+    public static final String PATH_OF_PRIVATE_KEY = String.join(File.separator, cwd, "asymmetricserver", "MyPrivateKey");
+    public static final String PATH_OF_PUBLIC_KEY = String.join(File.separator, cwd, "asymmetricserver", "MyPublicKey");
     private static final int port = 1234;
 
-    public static void main(String[] args) {
-        try {
+    public static void main(String[] args) throws IOException, ClassNotFoundException, InterruptedException {
+        ServerSocket serverSocket = new ServerSocket(port);
+//        Socket socket = serverSocket.accept();
+
+        HashMap<Client, Socket> clients = new HashMap<>();
+
+        ExecutorService executor = Executors.newFixedThreadPool(5);
+
+        AsymmetricClient asymmetricClient = new AsymmetricClient(new Client("Ahmed", "localhost", null));
+        executor.execute(asymmetricClient);
+
+
+        Socket socket1 = serverSocket.accept();
+        ServerHandler handler1 = new ServerHandler(clients, socket1);
+        executor.execute(handler1);
+//        Thread.sleep(2000);
+//
+//        AsymmetricClient asymmetricClient2 = new AsymmetricClient(new Client("Nour", "localhost", null));
+//        executor.execute(asymmetricClient2);
+//
+//        Socket socket2 = serverSocket.accept();
+//        ServerHandler handler2 = new ServerHandler(clients, socket2);
+//        executor.execute(handler2);
+
+//        while (true) {
+//            Socket socket = serverSocket.accept();
+//            ServerHandler handler = new ServerHandler(clients, socket);
+//            handler.run();
+//            executor.execute(handler);
+//        }
+
+
+        /*try {
             // Generating keys and definig a server socket.
             RSA rsa = new RSA();
             rsa.generateKeys(PATH_OF_PRIVATE_KEY, PATH_OF_PUBLIC_KEY);
@@ -73,6 +103,6 @@ public class AsymmetricServer {
             }
         } catch (IOException | ClassNotFoundException ex) {
             Logger.getLogger(AsymmetricServer.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        }*/
     }
 }

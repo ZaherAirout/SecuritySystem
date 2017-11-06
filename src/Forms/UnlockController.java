@@ -3,22 +3,23 @@
  */
 package Forms;
 
-import java.net.URL;
-import java.util.ResourceBundle;
+import asymmetricserver.Server;
 import javafx.animation.FadeTransition;
 import javafx.animation.ParallelTransition;
 import javafx.animation.SequentialTransition;
 import javafx.animation.Transition;
 import javafx.event.ActionEvent;
-import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
-import javafx.scene.input.KeyEvent;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.shape.Rectangle;
 import javafx.util.Callback;
 import javafx.util.Duration;
+
+import java.net.URL;
+import java.util.ResourceBundle;
 
 /**
  * The controller for our 'Unlock' application, see 'Unlock.fxml'.
@@ -27,6 +28,8 @@ import javafx.util.Duration;
  */
 public final class UnlockController {
 
+    @FXML
+    private Server server;
     @FXML // ResourceBundle that was given to the FXMLLoader
     private ResourceBundle resources;
     @FXML // URL location of the FXML file that was given to the FXMLLoader
@@ -48,56 +51,6 @@ public final class UnlockController {
     @FXML // fx:id="unlocktop"
     private Rectangle unlocktop; // Value injected by FXMLLoader
     private boolean open = false;
-
-    private final static class HeightTransition extends Transition {
-
-        final Rectangle node;
-        final double height;
-
-        public HeightTransition(Duration duration, Rectangle node) {
-            this(duration, node, node.getHeight());
-        }
-
-        public HeightTransition(Duration duration, Rectangle node, double height) {
-            this.node = node;
-            this.height = height;
-            this.setCycleDuration(duration);
-        }
-
-        public Duration getDuration() {
-            return getCycleDuration();
-        }
-
-        @Override
-        protected void interpolate(double frac) {
-            this.node.setHeight((1.0 - frac) * height);
-        }
-    }
-
-    private final static class WidthTransition extends Transition {
-
-        final Rectangle node;
-        final double width;
-
-        public WidthTransition(Duration duration, Rectangle node) {
-            this(duration, node, node.getWidth());
-        }
-
-        public WidthTransition(Duration duration, Rectangle node, double width) {
-            this.node = node;
-            this.width = width;
-            this.setCycleDuration(duration);
-        }
-
-        public Duration getDuration() {
-            return getCycleDuration();
-        }
-
-        @Override
-        protected void interpolate(double frac) {
-            this.node.setWidth((1.0 - frac) * width);
-        }
-    }
 
     private FadeTransition fadeOut(final Duration duration, final Node node) {
         final FadeTransition fadeOut = new FadeTransition(duration, node);
@@ -163,72 +116,33 @@ public final class UnlockController {
         unlockbottom.setVisible(true);
     }
 
-    // Handler for AnchorPane[id="AnchorPane"] onKeyPressed
-    private void keyboardKeyPressed(KeyEvent event) {
-        if (" ".equals(event.getCharacter())) {
-            // When "Hello World" is displayed (the theater is open) - pressing
-            // the space bar will reinitialize the application.
-            if (open) {
-                // Reinitializing the application...
-                open = false;
-                resetVisibility();
-                lock.requestFocus();
-            }
-        }
-    }
-    
-    private final class ValidateCallback implements Callback<String, Boolean> {
-        private ValidateCallback() {    
-        }
-        @Override
-        public Boolean call(String param) {
-            final boolean accessGranted = "1234".equals(param);
-            if (accessGranted) {
-                grantAccess();
-            } else {
-                rejectAccess();
-            }
-            return accessGranted;
-        }
-        
-    }
-
-    @FXML // This method is called by the FXMLLoader when initialization is complete
+    @FXML
+        // This method is called by the FXMLLoader when initialization is complete
     void initialize() {
         assert error != null : "fx:id=\"error\" was not injected: check your FXML file 'Unlock.fxml'.";
         assert lock != null : "fx:id=\"lock\" was not injected: check your FXML file 'Unlock.fxml'.";
         assert okleft != null : "fx:id=\"okleft\" was not injected: check your FXML file 'Unlock.fxml'.";
         assert okright != null : "fx:id=\"okright\" was not injected: check your FXML file 'Unlock.fxml'.";
         assert pad != null : "fx:id=\"pad\" was not injected: check your FXML file 'Unlock.fxml'.";
+        assert server != null : "fx:id=\"server\" was not injected: check your FXML file 'Unlock.fxml'.";
         assert root != null : "fx:id=\"root\" was not injected: check your FXML file 'Unlock.fxml'.";
         assert unlockbottom != null : "fx:id=\"unlockbottom\" was not injected: check your FXML file 'Unlock.fxml'.";
         assert unlocktop != null : "fx:id=\"unlocktop\" was not injected: check your FXML file 'Unlock.fxml'.";
 
         // set pin validation for the keypad
         pad.setValidateCallback(new ValidateCallback());
-        
+
         // reset visibility and opacity of nodes - usefull if you left your
         // FXML in a 'bad' state
-        resetVisibility();
-
-        // Add event handler to the root - used to handle the space bar key at the
-        // end of the application
-        root.addEventHandler(KeyEvent.KEY_TYPED, new EventHandler<Event>() {
-            @Override
-            public void handle(Event event) {
-                if (event instanceof KeyEvent) {
-                    keyboardKeyPressed((KeyEvent) event);
-                }
-            }
-        });
+//        resetVisibility();
     }
 
     private void grantAccess() {
-        root.requestFocus();
+//        root.requestFocus();
         pad.setDisable(true);
         FadeTransition fadeOutPad = fadeOut(Duration.valueOf("1s"), pad);
 
-        final WidthTransition openOkLeft = 
+        final WidthTransition openOkLeft =
                 new WidthTransition(Duration.valueOf("2s"), okleft);
         openOkLeft.setOnFinished(new EventHandler<ActionEvent>() {
             @Override
@@ -237,8 +151,8 @@ public final class UnlockController {
                 okleft.setWidth(openOkLeft.width);
             }
         });
-        
-        final WidthTransition openOkRight = 
+
+        final WidthTransition openOkRight =
                 new WidthTransition(openOkLeft.getDuration(), okright);
         openOkRight.setOnFinished(new EventHandler<ActionEvent>() {
             @Override
@@ -270,5 +184,74 @@ public final class UnlockController {
         errorTrans.setCycleCount(2);
         errorTrans.setAutoReverse(true);
         errorTrans.play();
+    }
+
+    private final static class HeightTransition extends Transition {
+
+        final Rectangle node;
+        final double height;
+
+        public HeightTransition(Duration duration, Rectangle node) {
+            this(duration, node, node.getHeight());
+        }
+
+        public HeightTransition(Duration duration, Rectangle node, double height) {
+            this.node = node;
+            this.height = height;
+            this.setCycleDuration(duration);
+        }
+
+        public Duration getDuration() {
+            return getCycleDuration();
+        }
+
+        @Override
+        protected void interpolate(double frac) {
+            this.node.setHeight((1.0 - frac) * height);
+        }
+    }
+
+    private final static class WidthTransition extends Transition {
+
+        final Rectangle node;
+        final double width;
+
+        public WidthTransition(Duration duration, Rectangle node) {
+            this(duration, node, node.getWidth());
+        }
+
+        public WidthTransition(Duration duration, Rectangle node, double width) {
+            this.node = node;
+            this.width = width;
+            this.setCycleDuration(duration);
+        }
+
+        public Duration getDuration() {
+            return getCycleDuration();
+        }
+
+        @Override
+        protected void interpolate(double frac) {
+            this.node.setWidth((1.0 - frac) * width);
+        }
+    }
+
+    private final class ValidateCallback implements Callback<String, Boolean> {
+        private ValidateCallback() {
+        }
+
+        @Override
+        public Boolean call(String param) {
+            grantAccess();
+            return true;
+            /*final boolean accessGranted = "1234".equals(param);
+            if (accessGranted) {
+                grantAccess();
+            } else {
+                rejectAccess();
+            }
+            return accessGranted;*/
+        }
+
     }
 }
