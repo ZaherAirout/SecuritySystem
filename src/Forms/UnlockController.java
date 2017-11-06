@@ -3,7 +3,7 @@
  */
 package Forms;
 
-import asymmetricserver.Server;
+import asymmetricserver.Forms.Server;
 import javafx.animation.FadeTransition;
 import javafx.animation.ParallelTransition;
 import javafx.animation.SequentialTransition;
@@ -13,7 +13,6 @@ import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.shape.Rectangle;
 import javafx.util.Callback;
 import javafx.util.Duration;
@@ -170,8 +169,16 @@ public final class UnlockController {
         okTrans.setOnFinished(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent arg0) {
-                open = true;
+                server.setDisable(false);
+                server.setVisible(true);
+                server.setOpacity(1.0);
+                unlockbottom.setVisible(false);
+                unlocktop.setVisible(false);
+                pad.setVisible(false);
+                okleft.setVisible(false);
+                okright.setVisible(false);
                 root.requestFocus();
+                server.requestFocus();
             }
         });
         okTrans.play();

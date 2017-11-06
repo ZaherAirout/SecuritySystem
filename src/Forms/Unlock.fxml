@@ -2,7 +2,7 @@
 
 <?scenebuilder-classpath-element ../../dist/UnlockCustom.jar?>
 
-<?import asymmetricserver.Server?>
+<?import asymmetricserver.Forms.Server?>
 <?import Forms.Keypad?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.image.Image?>

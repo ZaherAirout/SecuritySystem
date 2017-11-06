@@ -6,44 +6,30 @@ package asymmetricserver;
 import Protocol.Client;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.fxml.Initializable;
-import javafx.scene.control.Button;
 import javafx.scene.control.ListView;
 import javafx.scene.control.SelectionMode;
 import javafx.scene.input.MouseEvent;
 
-import java.net.URL;
-import java.util.ResourceBundle;
-
 /**
- * The controller for the custom Server component - see 'Server.fxml'
- * and 'Server.java'.
+ * The controller for our 'Server' application, see 'Server.fxml'.
+ * This class has all the logic to open the theater's doors using JavaFX
+ * transitions.
  */
-public final class ServerController implements Initializable{
+public final class ServerController {
 
-    @FXML
+
     public ListView<Client> clients;
-    public Button Send;
 
     @FXML
     public void initialize() {
+
         clients.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
 
-        ObservableList<Client> items = clients.getItems();
-        items.add(new Client("zaher", "localhost", null));
-        items.add(new Client("Zizo", "172.25.10.10", null));
-
-        clients.getSelectionModel().select(0);
+        ObservableList items = clients.getItems();
+        items.add(new Client("123", "1234", null));
+        items.add(new Client("1235666", "1234", null));
     }
 
-    @Override
-    public void initialize(URL location, ResourceBundle resources) {
-        initialize();
-    }
-
-
-    public void keyPressed(MouseEvent event) {
-
-        System.out.println("Hi");
+    public void createClient(MouseEvent mouseEvent) {
     }
 }
