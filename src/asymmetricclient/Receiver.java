@@ -6,14 +6,15 @@ import crypto.AES;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.net.Socket;
+import java.security.Key;
 import java.security.KeyException;
 import java.util.HashMap;
 
 public class Receiver extends Protocol.Receiver implements Runnable {
-    private final HashMap<Client, String> sessionKeys;
+    private final HashMap<Client, byte[]> sessionKeys;
     private Socket socket;
 
-    Receiver(Socket socket, HashMap<Client, String> sessionKeys) {
+    Receiver(Socket socket, HashMap<Client, byte[]> sessionKeys) {
         this.socket = socket;
         this.sessionKeys = sessionKeys;
     }
@@ -41,18 +42,19 @@ public class Receiver extends Protocol.Receiver implements Runnable {
     @Override
     public void execute(TextMessage msg) throws IOException, ClassNotFoundException, KeyException {
 
-        String sessionKey = new String(msg.sessionKey);
+        byte[] sessionKey = msg.sessionKey;
 
-        if (sessionKey == null || sessionKey.isEmpty())
+        if (sessionKey == null || sessionKey.length == 0)
             sessionKey = sessionKeys.get(msg.sender);
 
-        if (sessionKey == null || sessionKey.isEmpty())
+        if (sessionKey == null || sessionKey.length == 0)
             sessionKey = sessionKeys.get(msg.receiver);
 
-        if (sessionKey == null || sessionKey.isEmpty())
+        if (sessionKey == null || sessionKey.length == 0)
             throw new KeyException("Session Key is not found");
 
-        String result = new String(AES.decrypt(msg.content, sessionKey));
+        Key key = AES.regenerateKey(sessionKey);
+        String result = new String(AES.decrypt(msg.content, key));
 
         System.out.println(result);
     }

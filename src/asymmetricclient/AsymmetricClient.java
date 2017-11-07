@@ -25,7 +25,7 @@ public class AsymmetricClient implements Runnable {
     Client current = null;
     PublicKey publicKey;
 
-    HashMap<Client, String> sessionKeys;
+    HashMap<Client, byte[]> sessionKeys;
     List<Client> onlineClients;
 
 
