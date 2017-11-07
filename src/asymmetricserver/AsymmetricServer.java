@@ -23,30 +23,26 @@ public class AsymmetricServer {
     private static final int port = 1234;
 
     public static void main(String[] args) {
-        if (true) {
 
-            FileManager fileManager = FileManager.getInstance();
+        FileManager fileManager = FileManager.getInstance();
 //            fileManager.clearTemp();
-            String fileName = "1.jpg";
-            byte[] bytes = fileManager.readFile(fileName);
+        String fileName = "1.jpg";
+        byte[] bytes = fileManager.readFile(fileName);
 
-            EncryptedFile encryptedFile = fileManager.encryptFile(bytes, fileName, "zaher");
+        EncryptedFile encryptedFile = fileManager.encryptFile(bytes, fileName, "zaher");
 
-            fileManager.writeEncryptedFile(encryptedFile, ".\\TEMP");
+        fileManager.writeEncryptedFile(encryptedFile, ".\\TEMP");
 
-            EncryptedFile encryptedFile1 = fileManager.readEncryptedFile(".\\TEMP\\1.jpg.crypt");
-            File file = fileManager.decryptFile(encryptedFile1, "zaher");
-            fileManager.openFile(file);
-            try {
-                TimeUnit.SECONDS.sleep(1);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-            fileManager.clearTemp();
-            System.out.println("Fin");
-
+        EncryptedFile encryptedFile1 = fileManager.readEncryptedFile(".\\TEMP\\1.jpg.crypt");
+        File file = fileManager.decryptFile(encryptedFile1, "zaher");
+        fileManager.openFile(file);
+        try {
+            TimeUnit.SECONDS.sleep(1);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
-        return;
+        fileManager.clearTemp();
+        System.out.println("Fin");
 
     }
 }
