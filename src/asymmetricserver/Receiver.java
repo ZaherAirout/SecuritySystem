@@ -12,8 +12,8 @@ import java.net.Socket;
 import java.security.KeyException;
 
 public class Receiver extends Protocol.Receiver implements Runnable {
-
-    public static final int timeout = 2000;
+    // Timeout is 2 minutes
+    public static final int timeout = 2 * 60 * 1000;
     private final ObservableList<Pair<Client, Socket>> clients;
     Client sender;
     private ServerSocket sSocket;
