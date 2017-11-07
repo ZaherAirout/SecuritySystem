@@ -2,6 +2,10 @@ package asymmetricclient;
 
 import Protocol.Client;
 import Protocol.TextMessage;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.stage.Stage;
 
 import java.awt.event.ActionEvent;
 import java.io.File;
@@ -60,6 +64,16 @@ public class AsymmetricClient implements Runnable {
 
         // Create sender to send messages async
         sender = new Sender(socket, sessionKeys);
+        Parent root;
+        try {
+            root = FXMLLoader.load(getClass().getClassLoader().getResource("asymmetricclient/Client.fxml"));
+            Stage stage = new Stage();
+            stage.setTitle(current.getName());
+            stage.setScene(new Scene(root, 450, 450));
+            stage.show();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
 

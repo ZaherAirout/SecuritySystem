@@ -7,11 +7,15 @@ import Protocol.Client;
 import asymmetricclient.AsymmetricClient;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.SelectionMode;
 import javafx.scene.control.TextField;
+import javafx.stage.Stage;
 import javafx.util.Pair;
 
 import java.io.IOException;
@@ -86,5 +90,6 @@ public final class ServerController implements Initializable {
         executor.execute(asymmetricClient);
         Receiver receiver = new Receiver(serverSocket, clients);
         executor.execute(receiver);
+
     }
 }

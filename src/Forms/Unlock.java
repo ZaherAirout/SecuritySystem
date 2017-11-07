@@ -37,7 +37,7 @@ public class Unlock extends Application {
             Pane page = (Pane) FXMLLoader.load(Unlock.class.getResource(filename));
             Scene scene = new Scene(page);
             primaryStage.setScene(scene);
-            primaryStage.setTitle("Unlock Include Demo");
+            primaryStage.setTitle("Cryptography System");
             primaryStage.show();
         } catch (Exception ex) {
             Logger.getLogger(Unlock.class.getName()).log(Level.SEVERE, null, ex);
