@@ -52,7 +52,7 @@ public class AES {
 
         try {
             KeyGenerator keyGen = KeyGenerator.getInstance("AES");
-            keyGen.init(256);
+            keyGen.init(128);
             return keyGen.generateKey();
         } catch (Exception e) {
             System.err.println("Error while generating key: " + e);
