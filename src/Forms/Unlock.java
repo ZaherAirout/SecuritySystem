@@ -1,4 +1,6 @@
-
+/*
+ * Copyright (c) 2012, Oracle and/or its affiliates. All rights reserved.
+ */
 
 package Forms;
 
@@ -11,13 +13,13 @@ import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 
 /**
- * Main class for the Unlock Custom demo.
+ * Main class for the Unlock Include demo.
  * This is boilerplate code:
  * Loads 'Unlock.fxml', adds the root node to a Scene, and set the scene
  * to the application primary stage.
- * <br>The main difference between Unlock demo and Unlock Custom demo is that
- * here the key pad is defined as a custom type named Keypad. From within
- * Unlock.fxml we refer to the key pad by its Java class name, Keypad.
+ * <br>The main difference between Unlock demo and Unlock Include demo is that
+ * here the key pad is defined in a separate Keypad.fxml file which is
+ * included in Unlock.fxml thanks an fx:include statement.
  */
 public class Unlock extends Application {
 
@@ -35,7 +37,7 @@ public class Unlock extends Application {
             Pane page = (Pane) FXMLLoader.load(Unlock.class.getResource(filename));
             Scene scene = new Scene(page);
             primaryStage.setScene(scene);
-            primaryStage.setTitle("Unlock Custom Demo");
+            primaryStage.setTitle("Cryptography System");
             primaryStage.show();
         } catch (Exception ex) {
             Logger.getLogger(Unlock.class.getName()).log(Level.SEVERE, null, ex);

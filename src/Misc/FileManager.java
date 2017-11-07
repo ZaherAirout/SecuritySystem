@@ -1,6 +1,7 @@
 package Misc;
 
 import crypto.AES;
+import crypto.simple;
 
 import javax.crypto.Cipher;
 import java.awt.*;
@@ -25,6 +26,8 @@ public class FileManager {
     // file output stream for writing text files
     private FileOutputStream outStream;
 
+    protected FileManager() {
+    }
 
     // readFile method reads file from given path and returns string of file contents
     public byte[] readFile(String fileName) {
@@ -37,6 +40,25 @@ public class FileManager {
         }
 
         return result;
+    }
+
+    public EncryptedFile readEncryptedFile(String fileName) {
+        FileInputStream fin = null;
+        EncryptedFile result = null;
+        try {
+            fin = new FileInputStream(fileName);
+            ObjectInputStream ois = null;
+            try {
+                ois = new ObjectInputStream(fin);
+                result = (EncryptedFile) ois.readObject();
+            } catch (IOException | ClassNotFoundException e) {
+                e.printStackTrace();
+            }
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+        return result;
+
     }
 
     // writeFile method creates a file with given name and fills it with given content.
@@ -68,24 +90,33 @@ public class FileManager {
     }
 
     // encryptFile method takes plainText and encrypts it with secretKey, returns encrypted string
-    public EncryptedFile encryptFile(byte[] plainByte, String fileName, String key) {
+    public EncryptedFile encryptFile(byte[] plainByte, String fileName, String password) {
         EncryptedFile encryptedFile = new EncryptedFile();
-        encryptedFile.fileContent = AES.encrypt(plainByte, key);
-        encryptedFile.encryptedText = AES.encrypt(EncryptionFlag.getBytes(), key);
+        Key fileKey = AES.generateKey();
+        assert fileKey != null;
+
+        encryptedFile.fileContent = AES.encrypt(plainByte, fileKey);
+        encryptedFile.encryptedText = simple.encrypt(EncryptionFlag.getBytes(), password);
+        encryptedFile.encryptedKey = simple.encrypt(fileKey.getEncoded(), password);
         encryptedFile.fileName = fileName;
+
         return encryptedFile;
     }
 
     // decryptFile method takes encrypted text and decrypts it with secretKey, returns decrypted string
-    public File decryptFile(EncryptedFile encryptedFile, String key) {
+    public File decryptFile(EncryptedFile encryptedFile, String password) {
         File file = new File(TEMP + encryptedFile.fileName);
         DataOutputStream dos;
         try {
             dos = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(file)));
-            String testString = new String(AES.decrypt(encryptedFile.encryptedText, key));
+            String testString = new String(simple.decrypt(encryptedFile.encryptedText, password));
             if (!Objects.equals(testString, EncryptionFlag))
                 throw new Exception("Password Mismatch");
-            byte[] decryptFile = AES.decrypt(encryptedFile.fileContent, key);
+
+            Key decryptedKey = AES.regenerateKey(simple.decrypt(encryptedFile.encryptedKey, password));
+
+            byte[] decryptFile = AES.decrypt(encryptedFile.fileContent, decryptedKey);
+
             dos.write(decryptFile);
             dos.flush();
             dos.close();
@@ -95,10 +126,10 @@ public class FileManager {
         return file;
     }
 
-    public void writeFile(EncryptedFile encryptedFile, String path) {
+    public void writeEncryptedFile(EncryptedFile encryptedFile, String path) {
         FileOutputStream fout = null;
         try {
-            fout = new FileOutputStream(path + encryptedFile.fileName);
+            fout = new FileOutputStream(path + "\\" + encryptedFile.fileName + ".crypt");
             ObjectOutputStream oos = null;
             try {
                 oos = new ObjectOutputStream(fout);

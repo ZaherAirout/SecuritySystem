@@ -1,28 +1,23 @@
 package crypto;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.ObjectOutputStream;
-import java.security.InvalidKeyException;
-import java.security.KeyPair;
-import java.security.KeyPairGenerator;
-import java.security.NoSuchAlgorithmException;
-import java.security.PrivateKey;
-import java.security.PublicKey;
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectOutputStream;
+import java.security.*;
 
 public class RSA {
 
-    private final String ALGORITHM = "RSA";
+    static private final String ALGORITHM = "RSA";
 
     public RSA() {
     }
 
-    public void generateKeys(String pathOfPrivateKey, String pathOfPublicKey) {
+    static public void generateKeys(String pathOfPrivateKey, String pathOfPublicKey) {
         try {
             final KeyPairGenerator keyGen = KeyPairGenerator.getInstance(ALGORITHM);
             keyGen.initialize(1024);
@@ -49,7 +44,7 @@ public class RSA {
         }
     }
 
-    public byte[] encrypt(byte[] text, PublicKey key) {
+    static public byte[] encrypt(byte[] text, PublicKey key) {
         byte[] cipherText = null;
         try {
             final Cipher cipher = Cipher.getInstance(ALGORITHM);
@@ -61,7 +56,7 @@ public class RSA {
         return cipherText;
     }
 
-    public byte[] decrypt(byte[] text, PrivateKey key) {
+    static public byte[] decrypt(byte[] text, PrivateKey key) {
         byte[] dectyptedText = null;
         try {
             final Cipher cipher = Cipher.getInstance(ALGORITHM);
