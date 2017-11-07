@@ -13,6 +13,7 @@ import java.net.Socket;
 import java.util.HashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 public class AsymmetricServer {
 
@@ -26,16 +27,22 @@ public class AsymmetricServer {
 
             FileManager fileManager = FileManager.getInstance();
 //            fileManager.clearTemp();
-            String fileName = "2.txt";
+            String fileName = "1.jpg";
             byte[] bytes = fileManager.readFile(fileName);
 
             EncryptedFile encryptedFile = fileManager.encryptFile(bytes, fileName, "zaher");
 
             fileManager.writeEncryptedFile(encryptedFile, ".\\TEMP");
 
-            EncryptedFile encryptedFile1 = fileManager.readEncryptedFile(".\\TEMP\\2.txt.crypt");
+            EncryptedFile encryptedFile1 = fileManager.readEncryptedFile(".\\TEMP\\1.jpg.crypt");
             File file = fileManager.decryptFile(encryptedFile1, "zaher");
             fileManager.openFile(file);
+            try {
+                TimeUnit.SECONDS.sleep(1);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            fileManager.clearTemp();
             System.out.println("Fin");
 
         }
