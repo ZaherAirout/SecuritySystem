@@ -6,9 +6,11 @@ import javafx.collections.ObservableList;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.security.KeyException;
+import java.util.ArrayList;
 
 public class Receiver extends Protocol.Receiver implements Runnable {
     // Timeout is 2 minutes
@@ -42,10 +44,18 @@ public class Receiver extends Protocol.Receiver implements Runnable {
     }
 
     @Override
-    public void execute(ConnectionMessage msg) {
+    public void execute(ConnectionMessage msg) throws IOException {
         this.sender = msg.sender;
-        System.out.println(this.sender);
+
+        ArrayList list = new ArrayList();
+        list.addAll(clients);
+
         Platform.runLater(() -> clients.add(this.sender));
+
+        ObjectOutputStream stream = new ObjectOutputStream(socket.getOutputStream());
+
+        stream.writeObject(list);
+        stream.flush();
     }
 
     @Override
@@ -56,6 +66,13 @@ public class Receiver extends Protocol.Receiver implements Runnable {
     @Override
     public void execute(CheckOnlineMessage msg) {
 
+    }
+
+    @Override
+    public void execute(CloseConnectionMessage msg) {
+        Client sender = msg.sender;
+
+        Platform.runLater(() -> clients.remove(sender));
     }
 
 }

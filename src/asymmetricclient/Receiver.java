@@ -65,4 +65,9 @@ public class Receiver extends Protocol.Receiver implements Runnable {
     public void execute(CheckOnlineMessage msg) {
 
     }
+
+    @Override
+    public void execute(CloseConnectionMessage msg) {
+        throw new UnsupportedOperationException("Close Connection Message must not be sent to clients.");
+    }
 }

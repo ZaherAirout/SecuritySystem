@@ -4,6 +4,7 @@ import Protocol.Client;
 import Protocol.ConnectionMessage;
 import Protocol.Message;
 import crypto.RSA;
+import javafx.collections.ObservableList;
 
 import java.io.*;
 import java.net.Socket;
@@ -17,14 +18,15 @@ public class Connector implements Runnable {
 
     private final String serverIP;
     private final int serverPort;
-    List<Client> clients;
+    ObservableList<Client> clients;
     private Socket socket;
     private Client current;
 
-    Connector(Client current, String serverIP, int serverPort) {
+    Connector(Client current, ObservableList<Client> clients, String serverIP, int serverPort) {
         this.current = current;
         this.serverIP = serverIP;
         this.serverPort = serverPort;
+        this.clients = clients;
     }
 
     @Override
@@ -54,6 +56,13 @@ public class Connector implements Runnable {
 
             // TODO: get online clients from server
             // socket.read()
+
+            ObjectInputStream ois = new ObjectInputStream(socket.getInputStream());
+            List<Client> c = (List<Client>) ois.readObject();
+            clients.addAll(c);
+
+            socket.close();
+
 
         } catch (IOException | ClassNotFoundException e) {
             e.printStackTrace();

@@ -1,7 +1,9 @@
 package asymmetricclient;
 
 import Protocol.Client;
+import Protocol.CloseConnectionMessage;
 import Protocol.TextMessage;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.ListView;
 import javafx.scene.control.ProgressIndicator;
@@ -10,6 +12,7 @@ import javafx.scene.input.MouseEvent;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.util.HashMap;
 import java.util.List;
@@ -39,12 +42,15 @@ public class ClientController {
     private Receiver receiver;
     private Sender sender;
     private Client client;
+    private ObservableList<Client> clients;
 
 
     @FXML
     public void initialize() {
 
         sessionKeys = new HashMap<>();
+
+        clients = clientsListView.getItems();
 
     }
 
@@ -89,12 +95,9 @@ public class ClientController {
         showIndicator();
 
         // Connect to server
-        Connector connector = new Connector(this.currentClient, serverIP.getText(), Integer.parseInt(serverPort.getText()));
+        Connector connector = new Connector(this.currentClient, clients, serverIP.getText(), Integer.parseInt(serverPort.getText()));
 //        executorService.execute(connector);
         connector.run();
-
-        // TODO: Remove this
-//        Thread.sleep(30);
 
         hideIndicator();
 
@@ -119,5 +122,18 @@ public class ClientController {
 
     public void setClient(Client client) {
         this.currentClient = client;
+    }
+
+    void shutdown() throws IOException {
+        socket = new Socket(serverIP.getText(), Integer.parseInt(serverPort.getText()));
+
+        ObjectOutputStream oos = new ObjectOutputStream(socket.getOutputStream());
+
+        CloseConnectionMessage message = new CloseConnectionMessage();
+        message.sender = currentClient;
+        oos.writeObject(message);
+        oos.flush();
+
+        socket.close();
     }
 }

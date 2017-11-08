@@ -13,6 +13,8 @@ public abstract class Receiver {
 
     public abstract void execute(CheckOnlineMessage msg);
 
+    public abstract void execute(CloseConnectionMessage msg);
+
     public void execute(Message msg) throws IOException, ClassNotFoundException, KeyException {
 
         if (msg instanceof ConnectionMessage)
@@ -21,6 +23,8 @@ public abstract class Receiver {
             this.execute((TextMessage) msg);
         else if (msg instanceof CheckOnlineMessage)
             this.execute((CheckOnlineMessage) msg);
+        else if (msg instanceof CloseConnectionMessage)
+            this.execute((CloseConnectionMessage) msg);
         else
             throw new NotImplementedException();
 

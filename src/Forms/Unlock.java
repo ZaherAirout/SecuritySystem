@@ -6,6 +6,7 @@ package Forms;
 
 import asymmetricserver.ServerController;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.layout.Pane;
@@ -40,6 +41,7 @@ public class Unlock extends Application {
             Pane page = (Pane) FXMLLoader.load(Unlock.class.getResource(filename));
             Scene scene = new Scene(page);
             primaryStage.setScene(scene);
+            primaryStage.setOnHidden(event -> Platform.exit());
             primaryStage.setTitle("Server - " + InetAddress.getLocalHost().getHostAddress() + ":" + ServerController.PORT);
 
             primaryStage.show();
