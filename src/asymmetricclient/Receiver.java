@@ -82,7 +82,7 @@ public class Receiver extends Protocol.Receiver implements Runnable {
 
         String result = new String(AES.decrypt(msg.content, sessionKey));
 
-        Platform.runLater(() -> messages.add("" + msg.receiver.getName() + ":  " + result));
+        Platform.runLater(() -> messages.add(0, "" + msg.receiver.getName() + ":  " + result));
     }
 
     @Override
