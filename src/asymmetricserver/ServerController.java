@@ -44,17 +44,6 @@ public final class ServerController {
 
         // Create server socket to receive requests on port.
         serverSocket = new ServerSocket(PORT);
-
-/*
-        AsymmetricClient asymmetricClient = new AsymmetricClient(new Client("Ahmed", "localhost", null));
-        executor.execute(asymmetricClient);
-
-*/
-/*
-        Socket socket1 = serverSocket.accept();
-        ServerHandler handler1 = new ServerHandler(clients, socket1);
-        executor.execute(handler1);*/
-
     }
 
     @FXML

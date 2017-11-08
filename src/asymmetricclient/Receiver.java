@@ -2,6 +2,7 @@ package asymmetricclient;
 
 import Protocol.*;
 import crypto.AES;
+import crypto.RSA;
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
 
@@ -11,18 +12,24 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.security.Key;
 import java.security.KeyException;
+import java.security.KeyPair;
+import java.security.PrivateKey;
 import java.util.HashMap;
 
 public class Receiver extends Protocol.Receiver implements Runnable {
     private final HashMap<Client, byte[]> sessionKeys;
+    private final ObservableList<String> messages;
     private ServerSocket serverSocket;
     private Client currentClient;
+    private KeyPair pairKey;
 
-    Receiver(Client currentClient, HashMap<Client, byte[]> sessionKeys, ObservableList<Client> clients) throws IOException {
+    Receiver(Client currentClient, KeyPair pairKey, HashMap<Client, byte[]> sessionKeys, ObservableList<Client> clients, ObservableList<String> messages) throws IOException {
         super(clients);
         this.sessionKeys = sessionKeys;
         serverSocket = new ServerSocket(currentClient.port);
         this.currentClient = currentClient;
+        this.pairKey = pairKey;
+        this.messages = messages;
     }
 
     @Override
@@ -55,15 +62,14 @@ public class Receiver extends Protocol.Receiver implements Runnable {
             sessionKey = sessionKeys.get(msg.sender);
 
         if (sessionKey == null || sessionKey.length == 0)
-            sessionKey = sessionKeys.get(msg.receiver);
-
-        if (sessionKey == null || sessionKey.length == 0)
             throw new KeyException("Session Key is not found");
 
-        Key key = AES.regenerateKey(sessionKey);
+        PrivateKey aPrivate = pairKey.getPrivate();
+        Key key = AES.regenerateKey(RSA.decrypt(sessionKey, aPrivate));
         String result = new String(AES.decrypt(msg.content, key));
 
-        System.out.println(result);
+        messages.add("" + msg.receiver.getName() + ":  " + result);
+
     }
 
     @Override

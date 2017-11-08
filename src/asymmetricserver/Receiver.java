@@ -13,9 +13,8 @@ import java.security.KeyException;
 import java.util.ArrayList;
 
 public class Receiver extends Protocol.Receiver implements Runnable {
-    // Timeout is 2 minutes
-    public static final int timeout = 2 * 60 * 1000;
-    Client sender;
+
+    private Client sender;
     private ServerSocket serverSocket;
     private Socket socket;
 
@@ -28,14 +27,14 @@ public class Receiver extends Protocol.Receiver implements Runnable {
     public void run() {
         try {
             while (true) {
-                socket = serverSocket.accept();/*
-                // TODO: Set Timeout to 2mins to release the thread if client is disconnected.
-                socket.setSoTimeout(timeout);*/
-                // TODO: Complete server receiver protocol
+                socket = serverSocket.accept();
+
+                // read the message
                 ObjectInputStream ois = new ObjectInputStream(socket.getInputStream());
                 Message message = (Message) ois.readObject();
                 socket.close();
 
+                // execute the specific task depending on the type of the message
                 execute(message);
 
             }
@@ -49,7 +48,7 @@ public class Receiver extends Protocol.Receiver implements Runnable {
     public void execute(ConnectionMessage msg) throws IOException {
         this.sender = msg.sender;
 
-        ArrayList<Client> list = new ArrayList();
+        ArrayList<Client> list = new ArrayList<Client>();
         list.addAll(clients);
         list.add(this.sender);
 
@@ -84,7 +83,6 @@ public class Receiver extends Protocol.Receiver implements Runnable {
 
         // close the connection
         socket.close();
-
     }
 
     @Override
