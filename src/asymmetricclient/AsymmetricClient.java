@@ -1,72 +1,26 @@
 package asymmetricclient;
 
 import Protocol.Client;
-import Protocol.TextMessage;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
-import java.awt.event.ActionEvent;
-import java.io.File;
 import java.io.IOException;
-import java.net.Socket;
-import java.security.PublicKey;
-import java.util.HashMap;
-import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 public class AsymmetricClient implements Runnable {
-
-    private static final String cwd = System.getProperty("user.dir");
-    static final String PATH_OF_PRIVATE_KEY = String.join(File.separator, cwd, "asymmetricclient", "MyPrivateKey");
-    static final String PATH_OF_PUBLIC_KEY = String.join(File.separator, cwd, "asymmetricclient", "MyPublicKey");
-    ExecutorService executorService = Executors.newFixedThreadPool(5);
-
-    Socket socket = null;
-
-    Client current = null;
-    PublicKey publicKey;
-
-    HashMap<Client, byte[]> sessionKeys;
-    List<Client> onlineClients;
-
-
-    Receiver receiver;
-    final Sender sender;
 
 
     public AsymmetricClient(Client current) throws IOException, ClassNotFoundException, InterruptedException {
 
-        this.current = current;
-        sessionKeys = new HashMap<>();
-
-        // TODO: show progress bar
-        // ProgressBar.setVisiable(true);
-
-        // Connect to server
-        Connector connector = new Connector(this.current);
-        executorService.execute(connector);
-
-        // TODO: Hide progress bad
-        // ProgressBar.setVisiable(false);
-
-        // TODO: Remove this
-//        Thread.sleep(2000);
-
-        socket = connector.socket;
-        onlineClients = connector.clients;
-
-        // Receive and Handle messages async
-        receiver = new Receiver(socket, sessionKeys);
-        executorService.execute(receiver);
-
-        // Create sender to send messages async
-        sender = new Sender(socket, sessionKeys);
         Parent root;
         try {
-            root = FXMLLoader.load(getClass().getClassLoader().getResource("asymmetricclient/Client.fxml"));
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getClassLoader().getResource("asymmetricclient/Client.fxml"));
+            root = fxmlLoader.load();
+
+            ClientController controller = fxmlLoader.getController();
+            controller.setClient(current);
+
             Stage stage = new Stage();
             stage.setTitle(current.getName());
             stage.setScene(new Scene(root, 450, 450));
@@ -76,35 +30,8 @@ public class AsymmetricClient implements Runnable {
         }
     }
 
-
-    /***
-     * Send Message from current user using GUI to receiver
-     * @param e
-     */
-    public void sendMessage(ActionEvent e) {
-
-        // Create message
-        TextMessage message = new TextMessage();
-
-        // TODO: receiver from GUI, remove hard-coded
-        Client receiver = new Client("Ahmed", "localhost", null);
-
-        message.sender = current;
-        message.receiver = receiver;
-
-        // TODO: message from GUI, remove hard-coded
-        String messageContent = "Hello " + receiver.getName();
-
-        // sync so that messages don't get conflicted.
-        synchronized (sender) {
-            sender.setMessage(message);
-            sender.setContent(messageContent);
-            executorService.execute(sender);
-        }
-    }
-
-    @Override
     public void run() {
+
 /*
 
         // send 100 messages to Ahmed PC

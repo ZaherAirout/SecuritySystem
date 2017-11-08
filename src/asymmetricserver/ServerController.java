@@ -7,46 +7,43 @@ import Protocol.Client;
 import asymmetricclient.AsymmetricClient;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.fxml.Initializable;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
-import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.SelectionMode;
 import javafx.scene.control.TextField;
-import javafx.stage.Stage;
-import javafx.util.Pair;
+import javafx.scene.control.TextFormatter;
+import javafx.util.StringConverter;
+import javafx.util.converter.IntegerStringConverter;
 
 import java.io.IOException;
-import java.net.Inet4Address;
+import java.net.InetAddress;
 import java.net.ServerSocket;
-import java.net.Socket;
-import java.net.URL;
-import java.util.ResourceBundle;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.function.UnaryOperator;
 
 /**
  * The controller for the custom Server component - see 'Server.fxml'
  * and 'Server.java'.
  */
-public final class ServerController implements Initializable {
+public final class ServerController {
 
-    private static final int port = 1234;
+    public static final int PORT = 1025;
+    private final int nThreads = 5;
     @FXML
-    public ListView<Pair<Client, Socket>> clientsListView;
+    public TextField port;
+    @FXML
+    public ListView<Client> clientsListView;
     public TextField name;
-    ExecutorService executor = Executors.newFixedThreadPool(5);
-    ServerSocket serverSocket;
-    private ObservableList<Pair<Client, Socket>> clients;
+    private ExecutorService executor = Executors.newFixedThreadPool(nThreads);
+    private ServerSocket serverSocket;
+    private ObservableList<Client> clients;
 
 //    HashMap<Client, Socket> clients = new HashMap<>();
 
     public ServerController() throws IOException, InterruptedException, ClassNotFoundException {
 
         // Create server socket to receive requests on port.
-        serverSocket = new ServerSocket(port);
+        serverSocket = new ServerSocket(PORT);
 
 /*
         AsymmetricClient asymmetricClient = new AsymmetricClient(new Client("Ahmed", "localhost", null));
@@ -57,6 +54,7 @@ public final class ServerController implements Initializable {
         Socket socket1 = serverSocket.accept();
         ServerHandler handler1 = new ServerHandler(clients, socket1);
         executor.execute(handler1);*/
+
     }
 
     @FXML
@@ -64,32 +62,65 @@ public final class ServerController implements Initializable {
 
         clientsListView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
 
-        clientsListView.setCellFactory(param -> new ListCell<Pair<Client, Socket>>() {
-            @Override
-            protected void updateItem(Pair<Client, Socket> item, boolean empty) {
-                super.updateItem(item, empty);
-                if (item != null)
-                    setText(item.getKey().toString());
-            }
-        });
-
         clients = clientsListView.getItems();
-        clients.add(new Pair<Client, Socket>(new Client("zizo", "1234", null), new Socket()));
 
-    }
+        // allow user to input only integer in port TextField
+        UnaryOperator<TextFormatter.Change> integerFilter = change -> {
+            String newText = change.getControlNewText();
+            // if proposed change results in a valid value, return change as-is:
+            if (newText.matches("-?([1-9][0-9]*)?")) {
+                return change;
+            } else if ("-".equals(change.getText())) {
 
-    @Override
-    public void initialize(URL location, ResourceBundle resources) {
-        initialize();
+                // if user types or pastes a "-" in middle of current text,
+                // toggle sign of value:
+
+                if (change.getControlText().startsWith("-")) {
+                    // if we currently start with a "-", remove first character:
+                    change.setText("");
+                    change.setRange(0, 1);
+                    // since we're deleting a character instead of adding one,
+                    // the caret position needs to move back one, instead of
+                    // moving forward one, so we modify the proposed change to
+                    // move the caret two places earlier than the proposed change:
+                    change.setCaretPosition(change.getCaretPosition() - 2);
+                    change.setAnchor(change.getAnchor() - 2);
+                } else {
+                    // otherwise just insert at the beginning of the text:
+                    change.setRange(0, 0);
+                }
+                return change;
+            }
+            // invalid change, veto it by returning null:
+            return null;
+        };
+
+        // modified version of standard converter that evaluates an empty string
+        // as zero instead of null:
+        StringConverter<Integer> converter = new IntegerStringConverter() {
+            @Override
+            public Integer fromString(String s) {
+                if (s.isEmpty()) return 0;
+                return super.fromString(s);
+            }
+        };
+
+        port.setTextFormatter(new TextFormatter<Integer>(converter, 0, integerFilter));
+        port.setText(String.valueOf(1234));
+
+
+        for (int i = 0; i < nThreads; i++) {
+            Receiver receiver = new Receiver(serverSocket, clients);
+            executor.execute(receiver);
+        }
+
     }
 
     public void createLocalClient() throws InterruptedException, IOException, ClassNotFoundException {
-        Client client = new Client(name.getText(), String.valueOf(Inet4Address.getLocalHost()), null);
-        AsymmetricClient asymmetricClient = new AsymmetricClient(client);
 
-        executor.execute(asymmetricClient);
-        Receiver receiver = new Receiver(serverSocket, clients);
-        executor.execute(receiver);
+        Client client = new Client(name.getText(), String.valueOf(InetAddress.getLocalHost().getHostAddress()),
+                Integer.parseInt(port.getText()), null);
 
+        executor.execute(new AsymmetricClient(client));
     }
 }

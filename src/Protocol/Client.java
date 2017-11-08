@@ -4,14 +4,16 @@ import java.io.Serializable;
 import java.security.PublicKey;
 
 public class Client implements Serializable {
+    public final int port;
     public PublicKey publicKey;
     String name;
     String IP;
 
-    public Client(String name, String IP, PublicKey publicKey) {
+    public Client(String name, String IP, int port, PublicKey publicKey) {
         this.name = name;
         this.IP = IP;
         this.publicKey = publicKey;
+        this.port = port;
     }
 
     @Override
@@ -38,6 +40,6 @@ public class Client implements Serializable {
 
     @Override
     public String toString() {
-        return IP + ":" + name;
+        return name + "-" + IP + ":" + port;
     }
 }

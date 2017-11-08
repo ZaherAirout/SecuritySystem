@@ -41,6 +41,7 @@ public class Server extends GridPane {
         }
 
         final ServerController serverController = loader.getController();
+
         assert serverController != null;
         return serverController;
     }

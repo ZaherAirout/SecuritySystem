@@ -5,6 +5,7 @@ import crypto.AES;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.net.ServerSocket;
 import java.net.Socket;
 import java.security.Key;
 import java.security.KeyException;
@@ -12,17 +13,18 @@ import java.util.HashMap;
 
 public class Receiver extends Protocol.Receiver implements Runnable {
     private final HashMap<Client, byte[]> sessionKeys;
-    private Socket socket;
+    private ServerSocket serverSocket;
 
-    Receiver(Socket socket, HashMap<Client, byte[]> sessionKeys) {
-        this.socket = socket;
+    Receiver(int port, HashMap<Client, byte[]> sessionKeys) throws IOException {
         this.sessionKeys = sessionKeys;
+        serverSocket = new ServerSocket(port);
     }
 
     @Override
     public void run() {
         while (true) {
             try {
+                Socket socket = serverSocket.accept();
 
                 ObjectInputStream ois = new ObjectInputStream(socket.getInputStream());
                 Message msg = (Message) ois.readObject();

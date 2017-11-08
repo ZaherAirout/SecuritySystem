@@ -3,7 +3,6 @@ package asymmetricserver;
 import Protocol.*;
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
-import javafx.util.Pair;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -14,23 +13,23 @@ import java.security.KeyException;
 public class Receiver extends Protocol.Receiver implements Runnable {
     // Timeout is 2 minutes
     public static final int timeout = 2 * 60 * 1000;
-    private final ObservableList<Pair<Client, Socket>> clients;
+    private final ObservableList<Client> clients;
     Client sender;
-    private ServerSocket sSocket;
+    private ServerSocket serverSocket;
     private Socket socket;
 
-    public Receiver(ServerSocket sScoket, ObservableList<Pair<Client, Socket>> clients) {
-        this.sSocket = sScoket;
+    public Receiver(ServerSocket sScoket, ObservableList<Client> clients) {
+        this.serverSocket = sScoket;
         this.clients = clients;
     }
 
     @Override
     public void run() {
         try {
-            socket = sSocket.accept();
             while (true) {
+                socket = serverSocket.accept();/*
                 // TODO: Set Timeout to 2mins to release the thread if client is disconnected.
-                socket.setSoTimeout(timeout);
+                socket.setSoTimeout(timeout);*/
                 // TODO: Complete server receiver protocol
                 ObjectInputStream ois = new ObjectInputStream(socket.getInputStream());
                 Message message = (Message) ois.readObject();
@@ -43,11 +42,10 @@ public class Receiver extends Protocol.Receiver implements Runnable {
     }
 
     @Override
-    public void execute(ConnectionMessage msg) throws IOException {
+    public void execute(ConnectionMessage msg) {
         this.sender = msg.sender;
-        Pair<Client, Socket> pair = new Pair<>(this.sender, socket);
-
-        Platform.runLater(() -> clients.add(pair));
+        System.out.println(this.sender);
+        Platform.runLater(() -> clients.add(this.sender));
     }
 
     @Override

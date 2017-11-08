@@ -7,23 +7,24 @@ import crypto.RSA;
 
 import java.io.*;
 import java.net.Socket;
-import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.util.List;
 
-import static asymmetricclient.AsymmetricClient.PATH_OF_PRIVATE_KEY;
-import static asymmetricclient.AsymmetricClient.PATH_OF_PUBLIC_KEY;
+import static asymmetricclient.ClientController.PATH_OF_PRIVATE_KEY;
+import static asymmetricclient.ClientController.PATH_OF_PUBLIC_KEY;
 
 public class Connector implements Runnable {
 
+    private final String serverIP;
+    private final int serverPort;
     List<Client> clients;
-    PublicKey publicKey;
-    PrivateKey privateKey;
-    Socket socket;
-    Client current;
+    private Socket socket;
+    private Client current;
 
-    public Connector(Client current) {
+    Connector(Client current, String serverIP, int serverPort) {
         this.current = current;
+        this.serverIP = serverIP;
+        this.serverPort = serverPort;
     }
 
     @Override
@@ -32,9 +33,10 @@ public class Connector implements Runnable {
 
             // Generate Asymmetric Keys
             RSA rsa = new RSA();
+            System.out.println(PATH_OF_PRIVATE_KEY + current.getName());
             rsa.generateKeys(PATH_OF_PRIVATE_KEY + current.getName(), PATH_OF_PUBLIC_KEY + current.getName());
 
-            socket = new Socket("localhost", 1234);
+            socket = new Socket(serverIP, serverPort);
             // send connection message
             Message message = new ConnectionMessage();
 
@@ -44,8 +46,7 @@ public class Connector implements Runnable {
             // Read Public key and set it in message
             File publicKeyFile = new File(PATH_OF_PUBLIC_KEY + current.getName());
             ObjectInputStream inputStream = new ObjectInputStream(new FileInputStream(publicKeyFile));
-            publicKey = (PublicKey) inputStream.readObject();
-            message.sender.publicKey = publicKey;
+            message.sender.publicKey = (PublicKey) inputStream.readObject();
 
             // Write message to output stream
             ObjectOutputStream oos = new ObjectOutputStream(socket.getOutputStream());

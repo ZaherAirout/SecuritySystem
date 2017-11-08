@@ -156,22 +156,16 @@ public final class UnlockController {
 
         final WidthTransition openOkLeft =
                 new WidthTransition(Duration.valueOf("2s"), okleft);
-        openOkLeft.setOnFinished(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent arg0) {
-                okleft.setVisible(false);
-                okleft.setWidth(openOkLeft.width);
-            }
+        openOkLeft.setOnFinished(arg0 -> {
+            okleft.setVisible(false);
+            okleft.setWidth(openOkLeft.width);
         });
 
         final WidthTransition openOkRight =
                 new WidthTransition(openOkLeft.getDuration(), okright);
-        openOkRight.setOnFinished(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent arg0) {
-                okright.setVisible(false);
-                okright.setWidth(openOkRight.width);
-            }
+        openOkRight.setOnFinished(arg0 -> {
+            okright.setVisible(false);
+            okright.setWidth(openOkRight.width);
         });
 
         final ParallelTransition openOk =
@@ -179,13 +173,10 @@ public final class UnlockController {
 
         final SequentialTransition okTrans =
                 new SequentialTransition(fadeOutPad, openOk);
-        okTrans.setOnFinished(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent arg0) {
-                open = true;
-                root.requestFocus();
-                server.setVisible(true);
-            }
+        okTrans.setOnFinished(arg0 -> {
+            open = true;
+            root.requestFocus();
+            server.setVisible(true);
         });
         okTrans.play();
     }

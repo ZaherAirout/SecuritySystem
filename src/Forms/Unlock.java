@@ -4,13 +4,16 @@
 
 package Forms;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import asymmetricserver.ServerController;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
+
+import java.net.InetAddress;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Main class for the Unlock Include demo.
@@ -37,7 +40,8 @@ public class Unlock extends Application {
             Pane page = (Pane) FXMLLoader.load(Unlock.class.getResource(filename));
             Scene scene = new Scene(page);
             primaryStage.setScene(scene);
-            primaryStage.setTitle("Cryptography System");
+            primaryStage.setTitle("Server - " + InetAddress.getLocalHost().getHostAddress() + ":" + ServerController.PORT);
+
             primaryStage.show();
         } catch (Exception ex) {
             Logger.getLogger(Unlock.class.getName()).log(Level.SEVERE, null, ex);
