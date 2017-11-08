@@ -9,7 +9,6 @@ import javafx.collections.ObservableList;
 import java.io.*;
 import java.net.Socket;
 import java.security.PublicKey;
-import java.util.List;
 
 import static asymmetricclient.ClientController.PATH_OF_PRIVATE_KEY;
 import static asymmetricclient.ClientController.PATH_OF_PUBLIC_KEY;
@@ -56,10 +55,6 @@ public class Connector implements Runnable {
 
             // TODO: get online clients from server
             // socket.read()
-
-            ObjectInputStream ois = new ObjectInputStream(socket.getInputStream());
-            List<Client> c = (List<Client>) ois.readObject();
-            clients.addAll(c);
 
             socket.close();
 

@@ -24,8 +24,8 @@ public class ClientController {
     private static final String cwd = System.getProperty("user.dir");
     static final String PATH_OF_PRIVATE_KEY = String.join(File.separator, cwd, "asymmetricclient", "MyPrivateKey");
     static final String PATH_OF_PUBLIC_KEY = String.join(File.separator, cwd, "asymmetricclient", "MyPublicKey");
-    public TextField serverIP;
-    public TextField serverPort;
+    public TextField serverIPTextField;
+    public TextField serverPortTextField;
     public TextField msg;
     public ListView clientsListView;
     public ProgressIndicator progressIndicator;
@@ -43,15 +43,15 @@ public class ClientController {
     private Sender sender;
     private Client client;
     private ObservableList<Client> clients;
+    private String serverIP;
+    private int serverPort;
 
 
     @FXML
     public void initialize() {
-
         sessionKeys = new HashMap<>();
 
-        clients = clientsListView.getItems();
-
+        clients = (ObservableList<Client>) clientsListView.getItems();
     }
 
     /***
@@ -61,22 +61,30 @@ public class ClientController {
     public void send(MouseEvent e) {
 
         // Create message
-        TextMessage message = new TextMessage();
+        sender = new Sender(sessionKeys, serverIP, serverPort);
 
-        // TODO: receiver from GUI, remove hard-coded
-        Client receiver = new Client("Ahmed", "localhost", 1235, null);
+        ObservableList<Client> selectedItems = clientsListView.getSelectionModel().getSelectedItems();
+        if (selectedItems.size() == 0)
+            return;
 
-        message.sender = currentClient;
-        message.receiver = receiver;
+        for (Client receiver : selectedItems) {
 
-        // TODO: message from GUI, remove hard-coded
-        String messageContent = "Hello " + receiver.getName();
+            TextMessage message = new TextMessage();
 
-        // sync so that messages don't get conflicted.
-        synchronized (sender) {
+         /*   // TODO: receiver from GUI, remove hard-coded
+            Client receiver = new Client("Ahmed", "localhost", 1235, null);
+*/
+
+            message.sender = currentClient;
+            message.receiver = receiver;
+
+            // TODO: message from GUI, remove hard-coded
+            String messageContent = "Hello " + receiver.getName();
+
             sender.setMessage(message);
             sender.setContent(messageContent);
             executorService.execute(sender);
+
         }
     }
 
@@ -95,7 +103,7 @@ public class ClientController {
         showIndicator();
 
         // Connect to server
-        Connector connector = new Connector(this.currentClient, clients, serverIP.getText(), Integer.parseInt(serverPort.getText()));
+        Connector connector = new Connector(this.currentClient, clients, serverIPTextField.getText(), Integer.parseInt(serverPortTextField.getText()));
 //        executorService.execute(connector);
         connector.run();
 
@@ -106,8 +114,7 @@ public class ClientController {
 */
         // Receive and Handle messages async
         try {
-            System.out.println(currentClient.port);
-            receiver = new Receiver(currentClient.port, sessionKeys);
+            receiver = new Receiver(currentClient, sessionKeys, clients);
             executorService.execute(receiver);
         } catch (IOException e) {
             e.printStackTrace();
@@ -118,6 +125,9 @@ public class ClientController {
         // TODO: show progress bar
         // ProgressBar.setVisiable(true);
 
+
+        serverIP = serverIPTextField.getText();
+        serverPort = Integer.parseInt(serverPortTextField.getText());
     }
 
     public void setClient(Client client) {
@@ -125,7 +135,7 @@ public class ClientController {
     }
 
     void shutdown() throws IOException {
-        socket = new Socket(serverIP.getText(), Integer.parseInt(serverPort.getText()));
+        socket = new Socket(serverIPTextField.getText(), Integer.parseInt(serverPortTextField.getText()));
 
         ObjectOutputStream oos = new ObjectOutputStream(socket.getOutputStream());
 
@@ -135,5 +145,7 @@ public class ClientController {
         oos.flush();
 
         socket.close();
+
+        executorService.shutdownNow();
     }
 }

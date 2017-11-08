@@ -2,6 +2,8 @@ package asymmetricclient;
 
 import Protocol.*;
 import crypto.AES;
+import javafx.application.Platform;
+import javafx.collections.ObservableList;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -14,10 +16,13 @@ import java.util.HashMap;
 public class Receiver extends Protocol.Receiver implements Runnable {
     private final HashMap<Client, byte[]> sessionKeys;
     private ServerSocket serverSocket;
+    private Client currentClient;
 
-    Receiver(int port, HashMap<Client, byte[]> sessionKeys) throws IOException {
+    Receiver(Client currentClient, HashMap<Client, byte[]> sessionKeys, ObservableList<Client> clients) throws IOException {
+        super(clients);
         this.sessionKeys = sessionKeys;
-        serverSocket = new ServerSocket(port);
+        serverSocket = new ServerSocket(currentClient.port);
+        this.currentClient = currentClient;
     }
 
     @Override
@@ -69,5 +74,14 @@ public class Receiver extends Protocol.Receiver implements Runnable {
     @Override
     public void execute(CloseConnectionMessage msg) {
         throw new UnsupportedOperationException("Close Connection Message must not be sent to clients.");
+    }
+
+    @Override
+    public void execute(UpdateClientsMessage msg) {
+        Platform.runLater(() -> {
+            clients.clear();
+            msg.clients.removeIf(client -> client.equals(currentClient));
+            clients.addAll(msg.clients);
+        });
     }
 }

@@ -22,9 +22,9 @@
     <HBox layoutX="120.0" layoutY="250.0" prefHeight="100.0" prefWidth="200.0" spacing="20.0" GridPane.columnIndex="1"
           GridPane.rowIndex="3">
         <children>
-            <TextField fx:id="serverIP" maxWidth="185.0" minWidth="132.0" prefHeight="26.0" prefWidth="132.0"
+            <TextField fx:id="serverIPTextField" maxWidth="185.0" minWidth="132.0" prefHeight="26.0" prefWidth="132.0"
                        promptText="Server IP"/>
-            <TextField fx:id="serverPort" layoutX="10.0" layoutY="10.0" maxWidth="185.0" minWidth="62.0"
+            <TextField fx:id="serverPortTextField" layoutX="10.0" layoutY="10.0" maxWidth="185.0" minWidth="62.0"
                        prefHeight="26.0" prefWidth="62.0" promptText="Port"/>
             <Button maxWidth="40.0" minWidth="80.0" onMouseClicked="#connect" prefWidth="40.0" text="Connect"/>
         </children>

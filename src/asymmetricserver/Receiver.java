@@ -15,14 +15,13 @@ import java.util.ArrayList;
 public class Receiver extends Protocol.Receiver implements Runnable {
     // Timeout is 2 minutes
     public static final int timeout = 2 * 60 * 1000;
-    private final ObservableList<Client> clients;
     Client sender;
     private ServerSocket serverSocket;
     private Socket socket;
 
-    public Receiver(ServerSocket sScoket, ObservableList<Client> clients) {
-        this.serverSocket = sScoket;
-        this.clients = clients;
+    public Receiver(ServerSocket serverSocket, ObservableList<Client> clients) {
+        super(clients);
+        this.serverSocket = serverSocket;
     }
 
     @Override
@@ -35,7 +34,10 @@ public class Receiver extends Protocol.Receiver implements Runnable {
                 // TODO: Complete server receiver protocol
                 ObjectInputStream ois = new ObjectInputStream(socket.getInputStream());
                 Message message = (Message) ois.readObject();
+                socket.close();
+
                 execute(message);
+
             }
         } catch (IOException | ClassNotFoundException | KeyException e) {
             e.printStackTrace();
@@ -47,19 +49,41 @@ public class Receiver extends Protocol.Receiver implements Runnable {
     public void execute(ConnectionMessage msg) throws IOException {
         this.sender = msg.sender;
 
-        ArrayList list = new ArrayList();
+        ArrayList<Client> list = new ArrayList();
         list.addAll(clients);
+        list.add(this.sender);
 
         Platform.runLater(() -> clients.add(this.sender));
 
-        ObjectOutputStream stream = new ObjectOutputStream(socket.getOutputStream());
-
-        stream.writeObject(list);
-        stream.flush();
+        // new connection, so update GUI for every connected client
+        for (Client client : list) {
+            // connect to client
+            Socket socket = new Socket(client.IP, client.port);
+            // create update message
+            UpdateClientsMessage message = new UpdateClientsMessage(list);
+            // send the message
+            ObjectOutputStream oos = new ObjectOutputStream(socket.getOutputStream());
+            oos.writeObject(message);
+            oos.flush();
+            // close the connection
+            socket.close();
+        }
     }
 
     @Override
     public void execute(TextMessage msg) throws IOException, ClassNotFoundException, KeyException {
+
+        Client receiver = msg.receiver;
+
+        // Connect to the receiver
+        Socket socket = new Socket(receiver.IP, receiver.port);
+        ObjectOutputStream oos = new ObjectOutputStream(socket.getOutputStream());
+        // send the message
+        oos.writeObject(msg);
+        oos.flush();
+
+        // close the connection
+        socket.close();
 
     }
 
@@ -73,6 +97,11 @@ public class Receiver extends Protocol.Receiver implements Runnable {
         Client sender = msg.sender;
 
         Platform.runLater(() -> clients.remove(sender));
+    }
+
+    @Override
+    public void execute(UpdateClientsMessage message) {
+
     }
 
 }
