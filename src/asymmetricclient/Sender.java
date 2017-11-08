@@ -14,42 +14,51 @@ import java.util.HashMap;
 
 public class Sender implements Runnable {
     private final HashMap<Client, byte[]> sessionKeys;
-    private final Socket socket;
     private Message message;
-    private String content;
+    private String serverIP;
+    private int serverPort;
 
-    Sender(Socket socket, HashMap<Client, byte[]> sessionKeys) {
+    Sender(HashMap<Client, byte[]> sessionKeys, String serverIP, int serverPort) {
         this.sessionKeys = sessionKeys;
-        this.socket = socket;
+        this.serverIP = serverIP;
+        this.serverPort = serverPort;
     }
 
     @Override
     public void run() {
 
         try {
+            Socket socket = new Socket(serverIP, serverPort);
+
             Client receiver = message.receiver;
 
             // get Session key if exists, or create new one
-            Key sessionKey =AES.regenerateKey(sessionKeys.get(receiver));
+            Key sessionKey = null;
+            if (sessionKeys.get(receiver) != null)
+                sessionKey = AES.regenerateKey(sessionKeys.get(receiver));
+
             message.sessionKey = null;
 
             if (sessionKey == null) {
-                // TODO: Create session key using AES
+                // Create session key using AES
                 sessionKey = AES.generateKey();
 
                 // Store session key for late usage.
-                sessionKeys.put(message.sender, sessionKey.getEncoded());
+                assert sessionKey != null;
+                sessionKeys.put(receiver, sessionKey.getEncoded());
 
+                // Encrypt session key using RSA asymmetric algorithm
                 message.sessionKey = RSA.encrypt(sessionKey.getEncoded(), message.receiver.getPublicKey());
             }
 
-            // TODO: which content to encrypt
-            // encrypt content
-            message.content = AES.encrypt(content.getBytes(), sessionKey);
+            // Encrypt content using AES symmetric algorithm
+            message.content = AES.encrypt(message.content, sessionKey);
 
             ObjectOutputStream oos = new ObjectOutputStream(socket.getOutputStream());
             oos.writeObject(message);
             oos.flush();
+
+            socket.close();
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -58,9 +67,5 @@ public class Sender implements Runnable {
 
     public void setMessage(TextMessage message) {
         this.message = message;
-    }
-
-    void setContent(String content) {
-        this.content = content;
     }
 }

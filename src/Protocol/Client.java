@@ -4,14 +4,16 @@ import java.io.Serializable;
 import java.security.PublicKey;
 
 public class Client implements Serializable {
+    public final int port;
     public PublicKey publicKey;
+    public String IP;
     String name;
-    String IP;
 
-    public Client(String name, String IP, PublicKey publicKey) {
+    public Client(String name, String IP, int port, PublicKey publicKey) {
         this.name = name;
         this.IP = IP;
         this.publicKey = publicKey;
+        this.port = port;
     }
 
     @Override
@@ -23,7 +25,7 @@ public class Client implements Serializable {
     public boolean equals(Object obj) {
         if (obj instanceof Client) {
             Client client = (Client) obj;
-            return this.name.equals(client.name) && this.IP.equals(client.IP);
+            return this.name.equals(client.name) && this.IP.equals(client.IP) && this.port == client.port;
         }
         return super.equals(obj);
     }
@@ -38,6 +40,8 @@ public class Client implements Serializable {
 
     @Override
     public String toString() {
-        return IP + ":" + name;
+        return name + "-" + IP + ":" + port;
     }
+
+
 }

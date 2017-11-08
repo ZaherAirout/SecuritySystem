@@ -3,14 +3,12 @@ package Misc;
 import crypto.AES;
 import crypto.simple;
 
-import javax.crypto.Cipher;
 import java.awt.*;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.Key;
-import java.util.Base64;
 import java.util.Objects;
 
 // FileManager implementation for Secure File Transfer with "Diffie-Hellman key exchange"
@@ -174,5 +172,12 @@ public class FileManager {
         File temp = new File(TEMP);
         deleteFolder(temp);
         temp.mkdir();
+    }
+
+    public EncryptedFile encryptFile(File file, String password) throws IOException {
+        DataInputStream oos = new DataInputStream(new BufferedInputStream(new FileInputStream(file)));
+        byte[] ar = new byte[(int) file.length()];
+        oos.read(ar);
+        return encryptFile(ar, file.getName(), password);
     }
 }

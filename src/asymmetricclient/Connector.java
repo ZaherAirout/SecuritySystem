@@ -4,26 +4,32 @@ import Protocol.Client;
 import Protocol.ConnectionMessage;
 import Protocol.Message;
 import crypto.RSA;
+import javafx.collections.ObservableList;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.net.Socket;
-import java.security.PrivateKey;
-import java.security.PublicKey;
-import java.util.List;
-
-import static asymmetricclient.AsymmetricClient.PATH_OF_PRIVATE_KEY;
-import static asymmetricclient.AsymmetricClient.PATH_OF_PUBLIC_KEY;
+import java.security.KeyPair;
+import java.security.NoSuchAlgorithmException;
 
 public class Connector implements Runnable {
 
-    List<Client> clients;
-    PublicKey publicKey;
-    PrivateKey privateKey;
-    Socket socket;
-    Client current;
+    private final String serverIP;
+    private final int serverPort;
+    ObservableList<Client> clients;
+    private Socket socket;
+    private Client current;
+    private KeyPair keyPair;
 
-    public Connector(Client current) {
+    Connector(Client current, ObservableList<Client> clients, String serverIP, int serverPort) {
         this.current = current;
+        this.serverIP = serverIP;
+        this.serverPort = serverPort;
+        this.clients = clients;
+    }
+
+    public KeyPair getKeyPair() {
+        return keyPair;
     }
 
     @Override
@@ -32,30 +38,24 @@ public class Connector implements Runnable {
 
             // Generate Asymmetric Keys
             RSA rsa = new RSA();
-            rsa.generateKeys(PATH_OF_PRIVATE_KEY + current.getName(), PATH_OF_PUBLIC_KEY + current.getName());
+            keyPair = rsa.generateKeys();
 
-            socket = new Socket("localhost", 1234);
+            socket = new Socket(serverIP, serverPort);
             // send connection message
             Message message = new ConnectionMessage();
 
             message.receiver = null;
             message.sender = current;
-
-            // Read Public key and set it in message
-            File publicKeyFile = new File(PATH_OF_PUBLIC_KEY + current.getName());
-            ObjectInputStream inputStream = new ObjectInputStream(new FileInputStream(publicKeyFile));
-            publicKey = (PublicKey) inputStream.readObject();
-            message.sender.publicKey = publicKey;
+            message.sender.publicKey = keyPair.getPublic();
 
             // Write message to output stream
             ObjectOutputStream oos = new ObjectOutputStream(socket.getOutputStream());
             oos.writeObject(message);
             oos.flush();
 
-            // TODO: get online clients from server
-            // socket.read()
+            socket.close();
 
-        } catch (IOException | ClassNotFoundException e) {
+        } catch (IOException | NoSuchAlgorithmException e) {
             e.printStackTrace();
         }
 
