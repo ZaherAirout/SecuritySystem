@@ -1,6 +1,7 @@
 package asymmetricclient;
 
 import Misc.FileManager;
+import Misc.Logger;
 import Protocol.*;
 import crypto.AES;
 import crypto.RSA;
@@ -46,9 +47,14 @@ public class Receiver extends Protocol.Receiver implements Runnable {
 
                 executorService.execute(() -> {
                     try {
+                        Logger logger = new Logger("./log.txt");
+                        logger.start();
+
                         ObjectInputStream ois = new ObjectInputStream(socket.getInputStream());
                         Message msg = (Message) ois.readObject();
                         execute(msg);
+
+                        logger.stop("Receiving message ");
                     } catch (IOException | ClassNotFoundException | KeyException e) {
                         e.printStackTrace();
                     }
@@ -106,7 +112,7 @@ public class Receiver extends Protocol.Receiver implements Runnable {
 
         byte[] decryptedContent = AES.decrypt(msg.content, sessionKey);
         fileManager.openFile(fileManager.writeFile(msg.filename, decryptedContent));
-        messages.add("" + msg.receiver.getName() + ":  File Received -->" + msg.filename);
+        Platform.runLater(() -> messages.add("" + msg.receiver.getName() + ":  File Received -->" + msg.filename));
 
     }
 

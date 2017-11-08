@@ -1,5 +1,6 @@
 package asymmetricclient;
 
+import Misc.Logger;
 import Protocol.Client;
 import Protocol.FileMessage;
 import Protocol.Message;
@@ -31,6 +32,9 @@ public class Sender implements Runnable {
         try {
             Socket socket = new Socket(serverIP, serverPort);
 
+            Logger logger = new Logger("./log.txt");
+            logger.start();
+
             Client receiver = message.receiver;
 
             // get Session key if exists, or create new one
@@ -58,6 +62,8 @@ public class Sender implements Runnable {
             ObjectOutputStream oos = new ObjectOutputStream(socket.getOutputStream());
             oos.writeObject(message);
             oos.flush();
+
+            logger.stop("Sending Message ");
 
             socket.close();
 
