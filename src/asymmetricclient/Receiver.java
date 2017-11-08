@@ -13,23 +13,28 @@ import java.net.Socket;
 import java.security.Key;
 import java.security.KeyException;
 import java.security.KeyPair;
-import java.security.PrivateKey;
-import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class Receiver extends Protocol.Receiver implements Runnable {
-    private final HashMap<Client, byte[]> sessionKeys;
+    private final ConcurrentHashMap<Client, Key> sessionKeys;
     private final ObservableList<String> messages;
+    private final ExecutorService executorService;
+    private final int nThread = 4;
     private ServerSocket serverSocket;
     private Client currentClient;
     private KeyPair pairKey;
 
-    Receiver(Client currentClient, KeyPair pairKey, HashMap<Client, byte[]> sessionKeys, ObservableList<Client> clients, ObservableList<String> messages) throws IOException {
+    Receiver(Client currentClient, KeyPair pairKey, ConcurrentHashMap<Client, Key> sessionKeys, ObservableList<Client> clients, ObservableList<String> messages) throws IOException {
         super(clients);
+
         this.sessionKeys = sessionKeys;
-        serverSocket = new ServerSocket(currentClient.port);
+        this.serverSocket = new ServerSocket(currentClient.port);
         this.currentClient = currentClient;
         this.pairKey = pairKey;
         this.messages = messages;
+        this.executorService = Executors.newFixedThreadPool(nThread);
     }
 
     @Override
@@ -38,11 +43,17 @@ public class Receiver extends Protocol.Receiver implements Runnable {
             try {
                 Socket socket = serverSocket.accept();
 
-                ObjectInputStream ois = new ObjectInputStream(socket.getInputStream());
-                Message msg = (Message) ois.readObject();
+                executorService.execute(() -> {
+                    try {
+                        ObjectInputStream ois = new ObjectInputStream(socket.getInputStream());
+                        Message msg = (Message) ois.readObject();
+                        execute(msg);
+                    } catch (IOException | ClassNotFoundException | KeyException e) {
+                        e.printStackTrace();
+                    }
+                });
 
-                execute(msg);
-            } catch (IOException | ClassNotFoundException | KeyException e) {
+            } catch (IOException e) {
                 e.printStackTrace();
             }
         }
@@ -56,20 +67,22 @@ public class Receiver extends Protocol.Receiver implements Runnable {
     @Override
     public void execute(TextMessage msg) throws IOException, ClassNotFoundException, KeyException {
 
-        byte[] sessionKey = msg.sessionKey;
+        Key sessionKey = null;
 
-        if (sessionKey == null || sessionKey.length == 0)
+        byte[] sessionKeyArr = msg.sessionKey;
+        if (sessionKeyArr != null) {
+            sessionKey = AES.regenerateKey(RSA.decrypt(sessionKeyArr, pairKey.getPrivate()));
+            sessionKeys.put(msg.sender, sessionKey);
+        }
+        if (sessionKey == null)
             sessionKey = sessionKeys.get(msg.sender);
 
-        if (sessionKey == null || sessionKey.length == 0)
+        if (sessionKey == null)
             throw new KeyException("Session Key is not found");
 
-        PrivateKey aPrivate = pairKey.getPrivate();
-        Key key = AES.regenerateKey(RSA.decrypt(sessionKey, aPrivate));
-        String result = new String(AES.decrypt(msg.content, key));
+        String result = new String(AES.decrypt(msg.content, sessionKey));
 
-        messages.add("" + msg.receiver.getName() + ":  " + result);
-
+        Platform.runLater(() -> messages.add("" + msg.receiver.getName() + ":  " + result));
     }
 
     @Override

@@ -11,16 +11,21 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.security.KeyException;
 import java.util.ArrayList;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class Receiver extends Protocol.Receiver implements Runnable {
 
+    private final int nThreads = 4;
     private Client sender;
     private ServerSocket serverSocket;
     private Socket socket;
+    private ExecutorService executorService;
 
     public Receiver(ServerSocket serverSocket, ObservableList<Client> clients) {
         super(clients);
         this.serverSocket = serverSocket;
+        executorService = Executors.newFixedThreadPool(nThreads);
     }
 
     @Override
@@ -29,16 +34,23 @@ public class Receiver extends Protocol.Receiver implements Runnable {
             while (true) {
                 socket = serverSocket.accept();
 
-                // read the message
-                ObjectInputStream ois = new ObjectInputStream(socket.getInputStream());
-                Message message = (Message) ois.readObject();
-                socket.close();
+                executorService.execute(() -> {
+                    try {
+                        // read the message
+                        ObjectInputStream ois = new ObjectInputStream(socket.getInputStream());
+                        Message message = (Message) ois.readObject();
+                        socket.close();
 
-                // execute the specific task depending on the type of the message
-                execute(message);
+                        // execute the specific task depending on the type of the message
+                        execute(message);
+                    } catch (IOException | KeyException | ClassNotFoundException e) {
+                        e.printStackTrace();
+                    }
+
+                });
 
             }
-        } catch (IOException | ClassNotFoundException | KeyException e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
 

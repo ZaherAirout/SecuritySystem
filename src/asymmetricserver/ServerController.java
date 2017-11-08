@@ -28,22 +28,21 @@ import java.util.function.UnaryOperator;
 public final class ServerController {
 
     public static final int PORT = 1025;
-    private final int nThreads = 5;
+    private final int nThreads = 1;
     @FXML
     public TextField port;
     @FXML
     public ListView<Client> clientsListView;
+    @FXML
     public TextField name;
-    private ExecutorService executor = Executors.newFixedThreadPool(nThreads);
+    private ExecutorService executor;
     private ServerSocket serverSocket;
-    private ObservableList<Client> clients;
-
-//    HashMap<Client, Socket> clients = new HashMap<>();
 
     public ServerController() throws IOException, InterruptedException, ClassNotFoundException {
 
         // Create server socket to receive requests on port.
         serverSocket = new ServerSocket(PORT);
+        executor = Executors.newFixedThreadPool(nThreads);
     }
 
     @FXML
@@ -51,7 +50,7 @@ public final class ServerController {
 
         clientsListView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
 
-        clients = clientsListView.getItems();
+        ObservableList<Client> clients = clientsListView.getItems();
 
         // allow user to input only integer in port TextField
         UnaryOperator<TextFormatter.Change> integerFilter = change -> {
@@ -94,14 +93,17 @@ public final class ServerController {
             }
         };
 
-        port.setTextFormatter(new TextFormatter<Integer>(converter, 0, integerFilter));
+        port.setTextFormatter(new TextFormatter<>(converter, 0, integerFilter));
         port.setText(String.valueOf(1234));
 
 
-        for (int i = 0; i < nThreads; i++) {
-            Receiver receiver = new Receiver(serverSocket, clients);
-            executor.execute(receiver);
-        }
+
+        /*for (int i = 0; i < nThreads; i++) {
+        */
+        Receiver receiver = new Receiver(serverSocket, clients);
+        executor.execute(receiver);
+
+        /*}*/
 
     }
 
