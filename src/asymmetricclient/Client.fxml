@@ -1,43 +1,51 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.geometry.Insets?>
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
-<GridPane xmlns:fx="http://javafx.com/fxml/1" prefHeight="400.0" prefWidth="600.0"
-          xmlns="http://javafx.com/javafx/8.0.121" fx:controller="asymmetricclient.ClientController">
-    <ProgressIndicator fx:id="progressIndicator" visible="false" GridPane.columnIndex="2" GridPane.rowIndex="1"/>
-    <ListView fx:id="clientsListView" maxHeight="200.0" maxWidth="300.0" minHeight="200.0" minWidth="300.0"
-              prefHeight="200.0" prefWidth="300.0" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.ProgressIndicator?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.RowConstraints?>
+
+<GridPane prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1" fx:controller="asymmetricclient.ClientController">
+    <ProgressIndicator fx:id="progressIndicator" visible="false" GridPane.columnIndex="2" GridPane.rowIndex="1" />
+    <ListView fx:id="clientsListView" maxHeight="200.0" maxWidth="300.0" minHeight="200.0" minWidth="300.0" prefHeight="200.0" prefWidth="300.0" GridPane.columnIndex="1" GridPane.rowIndex="1" />
     <HBox prefHeight="100.0" prefWidth="200.0" spacing="20.0" GridPane.columnIndex="1" GridPane.rowIndex="2">
         <children>
-            <TextField fx:id="msg" maxWidth="185.0" minWidth="185.0" prefWidth="185.0" promptText="Your message here"/>
+            <TextField fx:id="msg" maxWidth="185.0" minWidth="185.0" prefWidth="185.0" promptText="Your message here" />
             <Button maxWidth="40.0" minWidth="80.0" onMouseClicked="#send" prefWidth="40.0" text="Create">
                 Send
             </Button>
         </children>
         <GridPane.margin>
-            <Insets left="10.0" top="10.0"/>
+            <Insets left="10.0" top="10.0" />
         </GridPane.margin>
     </HBox>
-    <HBox layoutX="120.0" layoutY="250.0" prefHeight="100.0" prefWidth="200.0" spacing="20.0" GridPane.columnIndex="1"
-          GridPane.rowIndex="3">
+    <HBox layoutX="120.0" layoutY="250.0" prefHeight="100.0" prefWidth="314.0" spacing="20.0" GridPane.columnIndex="1" GridPane.rowIndex="3">
         <children>
-            <TextField fx:id="serverIPTextField" maxWidth="185.0" minWidth="132.0" prefHeight="26.0" prefWidth="132.0"
-                       promptText="Server IP"/>
-            <TextField fx:id="serverPortTextField" layoutX="10.0" layoutY="10.0" maxWidth="185.0" minWidth="62.0"
-                       prefHeight="26.0" prefWidth="62.0" promptText="Port"/>
-            <Button maxWidth="40.0" minWidth="80.0" onMouseClicked="#connect" prefWidth="40.0" text="Connect"/>
+            <TextField fx:id="serverIPTextField" maxWidth="185.0" minWidth="132.0" prefHeight="26.0" prefWidth="132.0" promptText="Server IP" />
+            <TextField fx:id="serverPortTextField" layoutX="10.0" layoutY="10.0" maxWidth="185.0" minWidth="62.0" prefHeight="26.0" prefWidth="62.0" promptText="Port" />
+            <Button maxWidth="40.0" minWidth="80.0" onMouseClicked="#connect" prefWidth="40.0" text="Connect" />
         </children>
     </HBox>
+   <HBox prefHeight="100.0" prefWidth="200.0" spacing="10.0" GridPane.columnIndex="1" GridPane.rowIndex="4">
+      <children>
+         <Button mnemonicParsing="false" onMouseClicked="#decrypt" text="Decrypt File" />
+         <Button mnemonicParsing="false" onMouseClicked="#upload" text="Upload File" />
+      </children></HBox>
     <columnConstraints>
-        <ColumnConstraints minWidth="10.0" prefWidth="100.0"/>
-        <ColumnConstraints/>
-        <ColumnConstraints minWidth="10.0" prefWidth="100.0"/>
+        <ColumnConstraints minWidth="10.0" prefWidth="100.0" />
+        <ColumnConstraints />
+        <ColumnConstraints minWidth="10.0" prefWidth="100.0" />
     </columnConstraints>
     <rowConstraints>
-        <RowConstraints minHeight="10.0" prefHeight="30.0"/>
-        <RowConstraints/>
-        <RowConstraints maxHeight="104.0" minHeight="23.0" prefHeight="39.0"/>
-        <RowConstraints maxHeight="117.0" minHeight="10.0" prefHeight="101.0"/>
+        <RowConstraints minHeight="10.0" prefHeight="30.0" />
+        <RowConstraints />
+        <RowConstraints maxHeight="104.0" minHeight="23.0" prefHeight="49.0" />
+        <RowConstraints maxHeight="117.0" minHeight="10.0" prefHeight="42.0" />
+      <RowConstraints maxHeight="123.0" minHeight="10.0" prefHeight="88.0" />
     </rowConstraints>
 </GridPane>

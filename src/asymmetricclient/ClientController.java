@@ -1,14 +1,15 @@
 package asymmetricclient;
 
+import Misc.EncryptedFile;
+import Misc.FileManager;
 import Protocol.Client;
 import Protocol.CloseConnectionMessage;
 import Protocol.TextMessage;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.scene.control.ListView;
-import javafx.scene.control.ProgressIndicator;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.input.MouseEvent;
+import javafx.stage.FileChooser;
 
 import java.io.File;
 import java.io.IOException;
@@ -30,7 +31,6 @@ public class ClientController {
     public ListView clientsListView;
     public ProgressIndicator progressIndicator;
     private ExecutorService executorService = Executors.newFixedThreadPool(5);
-
     private Socket socket = null;
 
     private Client currentClient = null;
@@ -147,5 +147,24 @@ public class ClientController {
         socket.close();
 
         executorService.shutdownNow();
+    }
+
+    public void upload(MouseEvent mouseEvent) {
+
+    }
+
+    public void decrypt(MouseEvent mouseEvent) throws IOException {
+        File file = getFile();
+        FileManager fileManager = FileManager.getInstance();
+        EncryptedFile encryptedFile = fileManager.encryptFile(file, "password");
+        fileManager.writeEncryptedFile(encryptedFile, file.getPath());
+
+
+    }
+
+    private File getFile() {
+        // setup and get the file
+        FileChooser fileChooser = new FileChooser();
+        return fileChooser.showOpenDialog(serverIPTextField.getScene().getWindow());
     }
 }
