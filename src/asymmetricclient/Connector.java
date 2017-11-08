@@ -33,7 +33,6 @@ public class Connector implements Runnable {
 
             // Generate Asymmetric Keys
             RSA rsa = new RSA();
-            System.out.println(PATH_OF_PRIVATE_KEY + current.getName());
             rsa.generateKeys(PATH_OF_PRIVATE_KEY + current.getName(), PATH_OF_PUBLIC_KEY + current.getName());
 
             socket = new Socket(serverIP, serverPort);

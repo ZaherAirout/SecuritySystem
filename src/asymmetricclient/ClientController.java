@@ -4,6 +4,7 @@ import Protocol.Client;
 import Protocol.TextMessage;
 import javafx.fxml.FXML;
 import javafx.scene.control.ListView;
+import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.TextField;
 import javafx.scene.input.MouseEvent;
 
@@ -14,7 +15,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 
 public class ClientController {
 
@@ -25,11 +25,12 @@ public class ClientController {
     public TextField serverPort;
     public TextField msg;
     public ListView clientsListView;
+    public ProgressIndicator progressIndicator;
     private ExecutorService executorService = Executors.newFixedThreadPool(5);
 
     private Socket socket = null;
 
-    private Client current = null;
+    private Client currentClient = null;
 
     private HashMap<Client, byte[]> sessionKeys;
     private List<Client> onlineClients;
@@ -48,7 +49,7 @@ public class ClientController {
     }
 
     /***
-     * Send Message from current user using GUI to receiver
+     * Send Message from currentClient user using GUI to receiver
      * @param e
      */
     public void send(MouseEvent e) {
@@ -59,7 +60,7 @@ public class ClientController {
         // TODO: receiver from GUI, remove hard-coded
         Client receiver = new Client("Ahmed", "localhost", 1235, null);
 
-        message.sender = current;
+        message.sender = currentClient;
         message.receiver = receiver;
 
         // TODO: message from GUI, remove hard-coded
@@ -73,23 +74,37 @@ public class ClientController {
         }
     }
 
-    public void connect() {
-        // Connect to server
-        Connector connector = new Connector(this.current, serverIP.getText(), Integer.parseInt(serverPort.getText()));
-        Future<?> submit = executorService.submit(connector);
+    void showIndicator() {
+        progressIndicator.setVisible(true);
+    }
+
+    void hideIndicator() {
+        progressIndicator.setVisible(false);
+    }
+
+    public void connect() throws InterruptedException {
+
 
         // TODO: Hide progress bad
-        // ProgressBar.setVisiable(false);
+        showIndicator();
+
+        // Connect to server
+        Connector connector = new Connector(this.currentClient, serverIP.getText(), Integer.parseInt(serverPort.getText()));
+//        executorService.execute(connector);
+        connector.run();
 
         // TODO: Remove this
-//        Thread.sleep(2000);
+//        Thread.sleep(30);
+
+        hideIndicator();
 
        /* socket = connector.socket;
         onlineClients = connector.clients;
 */
         // Receive and Handle messages async
         try {
-            receiver = new Receiver(current.port, sessionKeys);
+            System.out.println(currentClient.port);
+            receiver = new Receiver(currentClient.port, sessionKeys);
             executorService.execute(receiver);
         } catch (IOException e) {
             e.printStackTrace();
@@ -103,6 +118,6 @@ public class ClientController {
     }
 
     public void setClient(Client client) {
-        this.current = client;
+        this.currentClient = client;
     }
 }
