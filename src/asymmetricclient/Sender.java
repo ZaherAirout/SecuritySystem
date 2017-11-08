@@ -1,6 +1,7 @@
 package asymmetricclient;
 
 import Protocol.Client;
+import Protocol.FileMessage;
 import Protocol.Message;
 import Protocol.TextMessage;
 import crypto.AES;
@@ -67,5 +68,9 @@ public class Sender implements Runnable {
 
     public void setMessage(TextMessage message) {
         this.message = message;
+    }
+
+    public void setMessage(FileMessage message) {
+        this.message= message;
     }
 }

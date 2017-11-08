@@ -1,5 +1,6 @@
 package asymmetricclient;
 
+import Misc.FileManager;
 import Protocol.*;
 import crypto.AES;
 import crypto.RSA;
@@ -83,6 +84,30 @@ public class Receiver extends Protocol.Receiver implements Runnable {
         String result = new String(AES.decrypt(msg.content, sessionKey));
 
         Platform.runLater(() -> messages.add("" + msg.receiver.getName() + ":  " + result));
+    }
+
+    @Override
+    public void execute(FileMessage msg) throws KeyException {
+        Key sessionKey = null;
+
+        byte[] sessionKeyArr = msg.sessionKey;
+        if (sessionKeyArr != null) {
+            sessionKey = AES.regenerateKey(RSA.decrypt(sessionKeyArr, pairKey.getPrivate()));
+            sessionKeys.put(msg.sender, sessionKey);
+        }
+        if (sessionKey == null)
+            sessionKey = sessionKeys.get(msg.sender);
+
+        if (sessionKey == null)
+            throw new KeyException("Session Key is not found");
+
+
+        FileManager fileManager = FileManager.getInstance();
+
+        byte[] decryptedContent = AES.decrypt(msg.content, sessionKey);
+        fileManager.openFile(fileManager.writeFile(msg.filename, decryptedContent));
+        messages.add("" + msg.receiver.getName() + ":  File Received -->" + msg.filename);
+
     }
 
     @Override

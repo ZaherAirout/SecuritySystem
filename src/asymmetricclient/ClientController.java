@@ -4,7 +4,9 @@ import Misc.EncryptedFile;
 import Misc.FileManager;
 import Protocol.Client;
 import Protocol.CloseConnectionMessage;
+import Protocol.FileMessage;
 import Protocol.TextMessage;
+import crypto.AES;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -17,6 +19,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.security.Key;
 import java.security.KeyPair;
 import java.util.concurrent.ConcurrentHashMap;
@@ -152,7 +156,33 @@ public class ClientController {
         executorService.shutdownNow();
     }
 
-    public void upload() {
+    public void upload() throws IOException {
+
+
+        String filePath = getFile().getPath();
+        byte[] fileBytes = Files.readAllBytes(Paths.get(filePath));
+        Sender sender = new Sender(sessionKeys, serverIP, serverPort);
+        ObservableList<Client> selectedItems = clientsListView.getSelectionModel().getSelectedItems();
+        if (selectedItems.size() == 0)
+            return;
+
+        for (Client receiver : selectedItems) {
+
+            // create text message
+            FileMessage message = new FileMessage();
+
+            message.sender = currentClient;
+            message.receiver = receiver;
+            FileManager fileManager = FileManager.getInstance();
+            message.filename = fileManager.getFileName(filePath);
+            System.out.println(message.filename);
+
+
+            message.content = fileBytes;
+            sender.setMessage(message);
+            executorService.execute(sender);
+
+        }
 
     }
 

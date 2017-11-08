@@ -60,9 +60,10 @@ public class FileManager {
     }
 
     // writeFile method creates a file with given name and fills it with given content.
-    public void writeFile(String fileName, byte[] fileContentBytes) {
+    public File writeFile(String fileName, byte[] fileContentBytes) {
+        String result = TEMP + fileName;
         try {
-            outStream = new FileOutputStream(fileName);
+            outStream = new FileOutputStream(result);
 
             outStream.write(fileContentBytes);
 
@@ -77,6 +78,7 @@ public class FileManager {
                 System.err.println("Error while closing File I/O: " + ex);
             }
         }
+        return new File(result);
     }
 
     // splits filename from the path and returns filename string

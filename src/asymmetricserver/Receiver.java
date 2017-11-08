@@ -98,6 +98,22 @@ public class Receiver extends Protocol.Receiver implements Runnable {
     }
 
     @Override
+    public void execute(FileMessage msg) throws KeyException, IOException {
+        Client receiver = msg.receiver;
+
+        // Connect to the receiver
+        Socket socket = new Socket(receiver.IP, receiver.port);
+        ObjectOutputStream oos = new ObjectOutputStream(socket.getOutputStream());
+        // send the message
+        oos.writeObject(msg);
+        oos.flush();
+
+        // close the connection
+        socket.close();
+
+    }
+
+    @Override
     public void execute(CheckOnlineMessage msg) {
 
     }
