@@ -7,7 +7,7 @@ public class Client implements Serializable {
     public final int port;
     public PublicKey publicKey;
     public String IP;
-    String name;
+    private String name;
 
     public Client(String name, String IP, int port, PublicKey publicKey) {
         this.name = name;

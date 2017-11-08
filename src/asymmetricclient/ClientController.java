@@ -5,7 +5,6 @@ import Misc.FileManager;
 import Protocol.Client;
 import Protocol.CloseConnectionMessage;
 import Protocol.TextMessage;
-import crypto.AES;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -18,13 +17,15 @@ import java.io.File;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+import java.security.Key;
 import java.security.KeyPair;
-import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class ClientController {
 
+    private final int nThread = 5;
     public TextField serverIPTextField;
     public TextField serverPortTextField;
     public TextField msg;
@@ -32,11 +33,11 @@ public class ClientController {
     public ProgressIndicator progressIndicator;
     public Button connectButton;
     public ListView<String> messagesList;
-    private ExecutorService executorService = Executors.newFixedThreadPool(4);
+    private ExecutorService executorService = Executors.newFixedThreadPool(nThread);
 
     private Client currentClient = null;
 
-    private HashMap<Client, byte[]> sessionKeys;
+    private ConcurrentHashMap<Client, Key> sessionKeys;
 
     private ObservableList<Client> clients;
     private String serverIP;
@@ -56,7 +57,7 @@ public class ClientController {
 
     @FXML
     public void initialize() {
-        sessionKeys = new HashMap<>();
+        sessionKeys = new ConcurrentHashMap<>();
 
         clients = clientsListView.getItems();
         serverPortTextField.setText("1025");
@@ -83,13 +84,6 @@ public class ClientController {
 
             message.sender = currentClient;
             message.receiver = receiver;
-
-            // encrypt the user provided message.
-            byte[] keyByte = sessionKeys.get(receiver);
-            if (keyByte == null || keyByte.length == 0)
-                keyByte = AES.generateKey().getEncoded();
-
-//            message.content = AES.encrypt(msg.getText().getBytes(), AES.regenerateKey(keyByte));
 
             message.content = msg.getText().getBytes();
             sender.setMessage(message);

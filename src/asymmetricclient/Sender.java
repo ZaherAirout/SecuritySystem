@@ -10,15 +10,15 @@ import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.security.Key;
-import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class Sender implements Runnable {
-    private final HashMap<Client, byte[]> sessionKeys;
+    private final ConcurrentHashMap<Client, Key> sessionKeys;
     private Message message;
     private String serverIP;
     private int serverPort;
 
-    Sender(HashMap<Client, byte[]> sessionKeys, String serverIP, int serverPort) {
+    Sender(ConcurrentHashMap<Client, Key> sessionKeys, String serverIP, int serverPort) {
         this.sessionKeys = sessionKeys;
         this.serverIP = serverIP;
         this.serverPort = serverPort;
@@ -35,7 +35,7 @@ public class Sender implements Runnable {
             // get Session key if exists, or create new one
             Key sessionKey = null;
             if (sessionKeys.get(receiver) != null)
-                sessionKey = AES.regenerateKey(sessionKeys.get(receiver));
+                sessionKey = sessionKeys.get(receiver);
 
             message.sessionKey = null;
 
@@ -45,7 +45,7 @@ public class Sender implements Runnable {
 
                 // Store session key for late usage.
                 assert sessionKey != null;
-                sessionKeys.put(receiver, sessionKey.getEncoded());
+                sessionKeys.put(receiver, sessionKey);
 
                 // Encrypt session key using RSA asymmetric algorithm
                 message.sessionKey = RSA.encrypt(sessionKey.getEncoded(), message.receiver.getPublicKey());
