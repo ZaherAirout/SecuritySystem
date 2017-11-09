@@ -84,9 +84,8 @@ public class FileManager {
     // splits filename from the path and returns filename string
     public String getFileName(String filePath) {
 
-        String[] split = filePath.split("\\/");
-
-        return split[split.length - 1];
+        int idx = filePath.replaceAll("\\\\", "/").lastIndexOf("/");
+        return idx >= 0 ? filePath.substring(idx + 1) : filePath;
     }
 
     // encryptFile method takes plainText and encrypts it with secretKey, returns encrypted string
@@ -105,9 +104,10 @@ public class FileManager {
 
     // decryptFile method takes encrypted text and decrypts it with secretKey, returns decrypted string
     public File decryptFile(EncryptedFile encryptedFile, String password) {
-        File file = new File(TEMP + encryptedFile.fileName);
+        File file = null;
         DataOutputStream dos;
         try {
+            file = new File(TEMP + encryptedFile.fileName);
             dos = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(file)));
             String testString = new String(simple.decrypt(encryptedFile.encryptedText, password));
             if (!Objects.equals(testString, EncryptionFlag))
@@ -121,27 +121,38 @@ public class FileManager {
             dos.flush();
             dos.close();
         } catch (Exception e) {
-            e.printStackTrace();
+            file = null;
+//            e.printStackTrace();
         }
         return file;
     }
 
     public void writeEncryptedFile(EncryptedFile encryptedFile, String path) {
         FileOutputStream fout = null;
+        ObjectOutputStream oos = null;
         try {
             fout = new FileOutputStream(path + "\\" + encryptedFile.fileName + ".crypt");
-            ObjectOutputStream oos = null;
             try {
                 oos = new ObjectOutputStream(fout);
                 oos.writeObject(encryptedFile);
+
             } catch (IOException e) {
                 e.printStackTrace();
             }
         } catch (FileNotFoundException e) {
             e.printStackTrace();
+        } finally {
+            try {
+                if (oos != null) {
+                    oos.flush();
+                    oos.close();
+                }
+            } catch (Exception ex) {
+                System.err.println("Error while closing File I/O: " + ex);
+            }
         }
-
     }
+
 
     // returns instance of FileManager singleton class.
     public static FileManager getInstance() {

@@ -7,7 +7,14 @@ import crypto.AES;
 import crypto.RSA;
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
+import javafx.scene.control.*;
+import javafx.scene.layout.GridPane;
+import javafx.stage.DirectoryChooser;
+import javafx.stage.FileChooser;
+import javafx.stage.Stage;
+import javafx.util.Pair;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.net.ServerSocket;
@@ -15,6 +22,7 @@ import java.net.Socket;
 import java.security.Key;
 import java.security.KeyException;
 import java.security.KeyPair;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -89,7 +97,7 @@ public class Receiver extends Protocol.Receiver implements Runnable {
 
         String result = new String(AES.decrypt(msg.content, sessionKey));
 
-        Platform.runLater(() -> messages.add(0, "" + msg.receiver.getName() + ":  " + result));
+        Platform.runLater(() -> messages.add(0, "" + msg.sender.getName() + ":  " + result));
     }
 
     @Override
@@ -111,8 +119,64 @@ public class Receiver extends Protocol.Receiver implements Runnable {
         FileManager fileManager = FileManager.getInstance();
 
         byte[] decryptedContent = AES.decrypt(msg.content, sessionKey);
-        fileManager.openFile(fileManager.writeFile(msg.filename, decryptedContent));
-        Platform.runLater(() -> messages.add("" + msg.receiver.getName() + ":  File Received -->" + msg.filename));
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                messages.add("" + msg.sender.getName() + ":  File Received -->" + msg.filename);
+
+                File receivedFile = fileManager.writeFile(msg.filename, decryptedContent);
+                Dialog<String> dialog = new Dialog<>();
+                dialog.setTitle("File Received ");
+                dialog.setHeaderText("You have received a new file From " + msg.sender.getName());
+                dialog.setResizable(false);
+
+
+                Button btnOpen = new Button("Open File");
+                btnOpen.setOnMouseClicked(event -> fileManager.openFile(receivedFile));
+
+                Button btnPath = new Button("Select Path");
+                Button btnSave = new Button("Save");
+
+                DirectoryChooser pathChooser = new DirectoryChooser();
+
+                final String[] path = {".\\"};
+                btnPath.setOnMouseClicked(event ->
+                {
+                    File file = pathChooser.showDialog(dialog.getOwner());
+                    path[0] = file.getPath();
+                });
+                System.out.println(path[0]);
+
+                PasswordField password = new PasswordField();
+                password.setPromptText("Enter Password");
+                btnSave.setOnMouseClicked(event -> {
+                            try {
+                                fileManager.writeEncryptedFile(fileManager.encryptFile(receivedFile, password.getText()), path[0]);
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                            alert.setTitle("Save");
+                            String s = "Successfully Saved in " + path[0];
+                            alert.setContentText(s);
+                            alert.show();
+                        }
+                );
+                GridPane grid = new GridPane();
+                grid.add(btnOpen, 2, 1);
+                grid.add(password, 1, 3);
+                grid.add(btnPath, 2, 3);
+                grid.add(btnSave, 3, 3);
+
+                dialog.getDialogPane().setContent(grid);
+
+                ButtonType buttonTypeOk = new ButtonType("Okay", ButtonBar.ButtonData.OK_DONE);
+                dialog.getDialogPane().getButtonTypes().add(buttonTypeOk);
+
+                dialog.showAndWait();
+
+            }
+        });
 
     }
 

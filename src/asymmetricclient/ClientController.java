@@ -9,10 +9,7 @@ import Protocol.TextMessage;
 import crypto.AES;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.scene.control.Button;
-import javafx.scene.control.ListView;
-import javafx.scene.control.ProgressIndicator;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.stage.FileChooser;
 
 import java.io.File;
@@ -23,6 +20,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.security.Key;
 import java.security.KeyPair;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -190,12 +188,35 @@ public class ClientController {
 
         // get the chosen file
         File file = getFile();
-        // encrypt it
+
+        // Get password
+        final String[] password = {"text"};
+        TextInputDialog dialog = new TextInputDialog("test");
+        dialog.setTitle("Password");
+        dialog.setContentText("Please enter file password:");
+
+        // Traditional way to get the response value.
+        Optional<String> result = dialog.showAndWait();
+
+
+        result.ifPresent(s -> password[0] = s);
+
+
+        // decrypt it
         FileManager fileManager = FileManager.getInstance();
-        EncryptedFile encryptedFile = fileManager.encryptFile(file, "password");
+
+        EncryptedFile encryptedFile = fileManager.readEncryptedFile(file.getPath());
+        File decryptFile = fileManager.decryptFile(encryptedFile, password[0]);
+        if (decryptFile == null) {
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Wrong Password");
+            alert.setContentText("sorry, you entered a wrong password");
+            alert.show();
+            return;
+        }
 
         // write it to some location in the hard drive
-        fileManager.writeEncryptedFile(encryptedFile, file.getPath());
+        fileManager.openFile(decryptFile);
     }
 
     private File getFile() {
