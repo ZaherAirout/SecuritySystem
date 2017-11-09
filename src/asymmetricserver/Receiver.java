@@ -32,15 +32,15 @@ public class Receiver extends Protocol.Receiver implements Runnable {
     public void run() {
         try {
             while (true) {
-                socket = serverSocket.accept();
+                Socket socket = serverSocket.accept();
 
                 executorService.execute(() -> {
                     try {
                         // read the message
                         ObjectInputStream ois = new ObjectInputStream(socket.getInputStream());
                         Message message = (Message) ois.readObject();
+                        ois.close();
                         socket.close();
-
                         // execute the specific task depending on the type of the message
                         execute(message);
                     } catch (IOException | KeyException | ClassNotFoundException e) {

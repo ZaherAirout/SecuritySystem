@@ -66,6 +66,7 @@ public class ClientController {
         serverIPTextField.setText("localhost");
 
         messages = messagesList.getItems();
+        clientsListView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
     }
 
     /***
@@ -73,13 +74,14 @@ public class ClientController {
      */
     public void send() {
 
-        Sender sender = new Sender(sessionKeys, serverIP, serverPort);
 
         ObservableList<Client> selectedItems = clientsListView.getSelectionModel().getSelectedItems();
         if (selectedItems.size() == 0)
             return;
 
         for (Client receiver : selectedItems) {
+
+            Sender sender = new Sender(sessionKeys, serverIP, serverPort);
 
             // create text message
             TextMessage message = new TextMessage();
@@ -159,12 +161,12 @@ public class ClientController {
 
         String filePath = getFile().getPath();
         byte[] fileBytes = Files.readAllBytes(Paths.get(filePath));
-        Sender sender = new Sender(sessionKeys, serverIP, serverPort);
         ObservableList<Client> selectedItems = clientsListView.getSelectionModel().getSelectedItems();
         if (selectedItems.size() == 0)
             return;
 
         for (Client receiver : selectedItems) {
+            Sender sender = new Sender(sessionKeys, serverIP, serverPort);
 
             // create text message
             FileMessage message = new FileMessage();
