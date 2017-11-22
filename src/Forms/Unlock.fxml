@@ -41,6 +41,6 @@
         <Server fx:id="server" visible="false"/>
     </children>
     <stylesheets>
-        <URL value="@Unlock.css"/>
+        <URL value="@../Styles/Unlock.css"/>
     </stylesheets>
 </AnchorPane>
