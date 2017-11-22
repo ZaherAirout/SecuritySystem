@@ -6,7 +6,6 @@ import Protocol.Client;
 import Protocol.CloseConnectionMessage;
 import Protocol.FileMessage;
 import Protocol.TextMessage;
-import crypto.AES;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
@@ -194,6 +193,8 @@ public class ClientController {
         // Get password
         final String[] password = {"text"};
         TextInputDialog dialog = new TextInputDialog("test");
+        dialog.getDialogPane().getStylesheets().clear();
+        dialog.getDialogPane().getStylesheets().add("Styles/style.css");
         dialog.setTitle("Password");
         dialog.setContentText("Please enter file password:");
 
@@ -211,6 +212,9 @@ public class ClientController {
         File decryptFile = fileManager.decryptFile(encryptedFile, password[0]);
         if (decryptFile == null) {
             Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.getDialogPane().getStylesheets().clear();
+            alert.getDialogPane().getStylesheets().add("Styles/style.css");
+
             alert.setTitle("Wrong Password");
             alert.setContentText("sorry, you entered a wrong password");
             alert.show();

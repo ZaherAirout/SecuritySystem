@@ -27,7 +27,7 @@ import java.util.function.UnaryOperator;
  */
 public final class ServerController {
 
-    public static final int PORT = 1025;
+    public static final int PORT = 1055;
     private final int nThreads = 1;
     @FXML
     public TextField port;

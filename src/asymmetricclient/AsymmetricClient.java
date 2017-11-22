@@ -24,7 +24,12 @@ public class AsymmetricClient implements Runnable {
 
             Stage stage = new Stage();
             stage.setTitle(current.getName());
-            stage.setScene(new Scene(root, 650, 450));
+            Scene scene = new Scene(root, 670, 400);
+
+            scene.getStylesheets().clear();
+            scene.getStylesheets().add("Styles/style.css");
+
+            stage.setScene(scene);
             stage.setOnHidden(event -> {
                 try {
                     controller.shutdown();

@@ -40,6 +40,10 @@ public class Unlock extends Application {
             String filename = "Unlock.fxml";
             Pane page = (Pane) FXMLLoader.load(Unlock.class.getResource(filename));
             Scene scene = new Scene(page);
+
+            scene.getStylesheets().clear();
+            scene.getStylesheets().add("Styles/style.css");
+
             primaryStage.setScene(scene);
             primaryStage.setOnHidden(event -> Platform.exit());
             primaryStage.setTitle("Server - " + InetAddress.getLocalHost().getHostAddress() + ":" + ServerController.PORT);

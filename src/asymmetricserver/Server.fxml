@@ -12,28 +12,30 @@
     <ListView fx:id="clientsListView" maxHeight="200.0" maxWidth="300.0" minHeight="200.0" minWidth="300.0"
               prefHeight="200.0" prefWidth="300.0" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
     <HBox prefHeight="100.0" prefWidth="200.0" spacing="5.0" GridPane.columnIndex="1" GridPane.rowIndex="2">
-      <children>
-          <TextField fx:id="name" maxWidth="185.0" minWidth="133.0" prefHeight="26.0" prefWidth="144.0"
-                     promptText="Local Client Name"/>
-          <TextField fx:id="port" layoutX="10.0" layoutY="10.0" maxWidth="185.0" minWidth="42.0" prefHeight="26.0"
-                     prefWidth="64.0" promptText="Port"/>
-          <Button maxWidth="62.0" minWidth="62.0" onMouseClicked="#createLocalClient" prefHeight="26.0" prefWidth="62.0"
-                  text="Create">
-            Send
-         </Button>
-      </children>
-      <GridPane.margin>
-          <Insets left="10.0" top="10.0"/>
-      </GridPane.margin>
-   </HBox>
-   <columnConstraints>
-       <ColumnConstraints minWidth="10.0" prefWidth="100.0"/>
-       <ColumnConstraints/>
-       <ColumnConstraints minWidth="10.0" prefWidth="100.0"/>
-   </columnConstraints>
-   <rowConstraints>
-       <RowConstraints minHeight="10.0" prefHeight="30.0"/>
-       <RowConstraints/>
-       <RowConstraints/>
-   </rowConstraints>
+        <children>
+            <TextField fx:id="name" maxWidth="185.0" minWidth="133.0" prefHeight="26.0" prefWidth="144.0"
+                       promptText="Local Client Name"/>
+            <TextField fx:id="port" layoutX="10.0" layoutY="10.0" maxWidth="185.0" minWidth="42.0" prefHeight="26.0"
+                       prefWidth="64.0" promptText="Port"/>
+            <Button maxWidth="62.0" minWidth="62.0" onMouseClicked="#createLocalClient" prefHeight="26.0"
+                    prefWidth="62.0"
+                    text="Create">
+                Send
+            </Button>
+        </children>
+        <GridPane.margin>
+            <Insets left="10.0" top="10.0"/>
+        </GridPane.margin>
+    </HBox>
+    <columnConstraints>
+        <ColumnConstraints minWidth="10.0" prefWidth="100.0"/>
+        <ColumnConstraints/>
+        <ColumnConstraints minWidth="10.0" prefWidth="100.0"/>
+    </columnConstraints>
+    <rowConstraints>
+        <RowConstraints minHeight="10.0" prefHeight="30.0"/>
+        <RowConstraints/>
+        <RowConstraints/>
+    </rowConstraints>
+
 </fx:root>
