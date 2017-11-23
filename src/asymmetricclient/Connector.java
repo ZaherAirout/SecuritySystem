@@ -37,8 +37,8 @@ public class Connector implements Runnable {
         try {
 
             // Generate Asymmetric Keys
-            RSA rsa = new RSA();
-            keyPair = rsa.generateKeys();
+
+            keyPair = RSA.generateKeys();
 
             socket = new Socket(serverIP, serverPort);
             // send connection message

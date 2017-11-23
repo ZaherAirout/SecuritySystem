@@ -61,7 +61,7 @@ public class ClientController {
         sessionKeys = new ConcurrentHashMap<>();
 
         clients = clientsListView.getItems();
-        serverPortTextField.setText("1025");
+        serverPortTextField.setText("1055");
         serverIPTextField.setText("localhost");
 
         messages = messagesList.getItems();
