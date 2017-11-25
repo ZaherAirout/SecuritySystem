@@ -5,6 +5,9 @@ import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import java.io.IOException;
 import java.security.KeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.SignatureException;
 import java.util.List;
 
 public abstract class Receiver {
@@ -17,15 +20,15 @@ public abstract class Receiver {
 
     public abstract void execute(ConnectionMessage msg) throws IOException;
 
-    public abstract void execute(TextMessage msg) throws IOException, ClassNotFoundException, KeyException;
+    public abstract void execute(TextMessage msg) throws IOException, ClassNotFoundException, KeyException, SignatureException, NoSuchProviderException, NoSuchAlgorithmException;
 
-    public abstract void execute(FileMessage msg) throws KeyException, IOException;
+    public abstract void execute(FileMessage msg) throws KeyException, IOException, NoSuchProviderException, NoSuchAlgorithmException, SignatureException;
 
     public abstract void execute(CheckOnlineMessage msg);
 
     public abstract void execute(CloseConnectionMessage msg);
 
-    public void execute(Message msg) throws IOException, ClassNotFoundException, KeyException {
+    public void execute(Message msg) throws IOException, ClassNotFoundException, KeyException, NoSuchAlgorithmException, SignatureException, NoSuchProviderException {
 
         if (msg instanceof ConnectionMessage)
             this.execute((ConnectionMessage) msg);

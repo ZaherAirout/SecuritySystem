@@ -10,6 +10,9 @@ import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.security.KeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.SignatureException;
 import java.util.ArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -43,7 +46,7 @@ public class Receiver extends Protocol.Receiver implements Runnable {
                         socket.close();
                         // execute the specific task depending on the type of the message
                         execute(message);
-                    } catch (IOException | KeyException | ClassNotFoundException e) {
+                    } catch (IOException | KeyException | ClassNotFoundException | NoSuchAlgorithmException | SignatureException | NoSuchProviderException e) {
                         e.printStackTrace();
                     }
 

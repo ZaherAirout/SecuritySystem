@@ -11,6 +11,7 @@ import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.security.KeyPair;
 import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
 
 public class Connector implements Runnable {
 
@@ -55,7 +56,7 @@ public class Connector implements Runnable {
 
             socket.close();
 
-        } catch (IOException | NoSuchAlgorithmException e) {
+        } catch (IOException | NoSuchAlgorithmException | NoSuchProviderException e) {
             e.printStackTrace();
         }
 

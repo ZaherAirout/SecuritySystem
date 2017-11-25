@@ -80,7 +80,7 @@ public class ClientController {
 
         for (Client receiver : selectedItems) {
 
-            Sender sender = new Sender(sessionKeys, serverIP, serverPort);
+            Sender sender = new Sender(sessionKeys, keyPair.getPrivate(), serverIP, serverPort);
 
             // create text message
             TextMessage message = new TextMessage();
@@ -112,6 +112,7 @@ public class ClientController {
 
         // Connect to server
         Connector connector = new Connector(this.currentClient, clients, serverIPTextField.getText(), Integer.parseInt(serverPortTextField.getText()));
+
         connector.run();
 
         setKeyPair(connector.getKeyPair());
@@ -165,7 +166,7 @@ public class ClientController {
             return;
 
         for (Client receiver : selectedItems) {
-            Sender sender = new Sender(sessionKeys, serverIP, serverPort);
+            Sender sender = new Sender(sessionKeys, keyPair.getPrivate(), serverIP, serverPort);
 
             // create text message
             FileMessage message = new FileMessage();

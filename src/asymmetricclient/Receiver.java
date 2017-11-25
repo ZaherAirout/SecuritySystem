@@ -19,9 +19,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.security.Key;
-import java.security.KeyException;
-import java.security.KeyPair;
+import java.security.*;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
@@ -60,10 +58,12 @@ public class Receiver extends Protocol.Receiver implements Runnable {
 
                         ObjectInputStream ois = new ObjectInputStream(socket.getInputStream());
                         Message msg = (Message) ois.readObject();
+
+
                         execute(msg);
 
                         logger.stop("Receiving message ");
-                    } catch (IOException | ClassNotFoundException | KeyException e) {
+                    } catch (IOException | ClassNotFoundException | KeyException | NoSuchAlgorithmException | SignatureException | NoSuchProviderException e) {
                         e.printStackTrace();
                     }
                 });
@@ -80,7 +80,7 @@ public class Receiver extends Protocol.Receiver implements Runnable {
     }
 
     @Override
-    public void execute(TextMessage msg) throws IOException, ClassNotFoundException, KeyException {
+    public void execute(TextMessage msg) throws IOException, ClassNotFoundException, KeyException, SignatureException, NoSuchProviderException, NoSuchAlgorithmException {
 
         Key sessionKey = null;
 
@@ -95,13 +95,26 @@ public class Receiver extends Protocol.Receiver implements Runnable {
         if (sessionKey == null)
             throw new KeyException("Session Key is not found");
 
-        String result = new String(AES.decrypt(msg.content, sessionKey));
+        byte[] decryptedContent = AES.decrypt(msg.content, sessionKey);
+        String result = new String(decryptedContent);
 
-        Platform.runLater(() -> messages.add(0, "" + msg.sender.getName() + ":  " + result));
+        Signature signature = null;
+        signature = Signature.getInstance("SHA1withDSA", "SUN");
+
+        assert signature != null;
+
+        PublicKey publicKey = pairKey.getPublic();
+        signature.initVerify(publicKey);
+        byte[] digitalSignature = msg.digitalSignature;
+        signature.update(decryptedContent);
+
+        boolean verified = signature.verify(digitalSignature);
+        String verificationRes = verified ? "Data verified." : "Cannot verify data.";
+        Platform.runLater(() -> messages.add(0, "" + msg.sender.getName() + ":  " + result + " Verification Status :" + verificationRes));
     }
 
     @Override
-    public void execute(FileMessage msg) throws KeyException {
+    public void execute(FileMessage msg) throws KeyException, NoSuchProviderException, NoSuchAlgorithmException, SignatureException {
         Key sessionKey = null;
 
         byte[] sessionKeyArr = msg.sessionKey;
@@ -119,10 +132,24 @@ public class Receiver extends Protocol.Receiver implements Runnable {
         FileManager fileManager = FileManager.getInstance();
 
         byte[] decryptedContent = AES.decrypt(msg.content, sessionKey);
+
+        Signature signature = null;
+        signature = Signature.getInstance("SHA1withDSA", "SUN");
+
+        assert signature != null;
+        PublicKey publicKey = pairKey.getPublic();
+        signature.initVerify(publicKey);
+        byte[] digitalSignature = msg.digitalSignature;
+        signature.update(decryptedContent);
+
+        boolean verified = signature.verify(digitalSignature);
+        String verificationRes = verified ? "Data verified." : "Cannot verify data.";
+
+
         Platform.runLater(new Runnable() {
             @Override
             public void run() {
-                messages.add("" + msg.sender.getName() + ":  File Received -->" + msg.filename);
+                messages.add("" + msg.sender.getName() + ":  File Received -->" + msg.filename + " Verification Status :" + verificationRes);
 
                 File receivedFile = fileManager.writeFile(msg.filename, decryptedContent);
                 Dialog<String> dialog = new Dialog<>();

@@ -11,7 +11,7 @@ import crypto.RSA;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
-import java.security.Key;
+import java.security.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class Sender implements Runnable {
@@ -19,11 +19,13 @@ public class Sender implements Runnable {
     private Message message;
     private String serverIP;
     private int serverPort;
+    private PrivateKey privateKey;
 
-    Sender(ConcurrentHashMap<Client, Key> sessionKeys, String serverIP, int serverPort) {
+    Sender(ConcurrentHashMap<Client, Key> sessionKeys,PrivateKey privateKey, String serverIP, int serverPort) {
         this.sessionKeys = sessionKeys;
         this.serverIP = serverIP;
         this.serverPort = serverPort;
+        this.privateKey = privateKey;
     }
 
     @Override
@@ -59,6 +61,14 @@ public class Sender implements Runnable {
             // Encrypt content using AES symmetric algorithm
             message.content = AES.encrypt(message.content, sessionKey);
 
+            // sign the message
+            Signature signature = Signature.getInstance("SHA1withDSA", "SUN");
+
+            signature.initSign(privateKey);
+            signature.update(message.content);
+
+            message.digitalSignature = signature.sign();
+
             ObjectOutputStream oos = new ObjectOutputStream(socket.getOutputStream());
             oos.writeObject(message);
             oos.flush();
@@ -67,7 +77,7 @@ public class Sender implements Runnable {
 
             socket.close();
 
-        } catch (IOException e) {
+        } catch (IOException | NoSuchAlgorithmException | NoSuchProviderException | SignatureException | InvalidKeyException e) {
             e.printStackTrace();
         }
     }
@@ -77,6 +87,6 @@ public class Sender implements Runnable {
     }
 
     public void setMessage(FileMessage message) {
-        this.message= message;
+        this.message = message;
     }
 }
