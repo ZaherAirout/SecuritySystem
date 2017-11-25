@@ -3,15 +3,14 @@ package asymmetricclient;
 import Protocol.Client;
 import Protocol.ConnectionMessage;
 import Protocol.Message;
-import crypto.RSA;
 import javafx.collections.ObservableList;
 
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.security.KeyPair;
+import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
 
 public class Connector implements Runnable {
 
@@ -38,8 +37,10 @@ public class Connector implements Runnable {
         try {
 
             // Generate Asymmetric Keys
-
-            keyPair = RSA.generateKeys();
+            KeyPairGenerator kpg = KeyPairGenerator.getInstance("RSA");
+            kpg.initialize(1024);
+//            keyPair = RSA.generateKeys();
+            keyPair = kpg.generateKeyPair();
 
             socket = new Socket(serverIP, serverPort);
             // send connection message
@@ -56,7 +57,7 @@ public class Connector implements Runnable {
 
             socket.close();
 
-        } catch (IOException | NoSuchAlgorithmException | NoSuchProviderException e) {
+        } catch (IOException | NoSuchAlgorithmException e) {
             e.printStackTrace();
         }
 

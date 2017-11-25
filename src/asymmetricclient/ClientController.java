@@ -54,6 +54,7 @@ public class ClientController {
 
     private void setKeyPair(KeyPair keyPair) {
         this.keyPair = keyPair;
+//        currentClient.publicKey = this.keyPair.getPublic();
     }
 
     @FXML
@@ -61,7 +62,7 @@ public class ClientController {
         sessionKeys = new ConcurrentHashMap<>();
 
         clients = clientsListView.getItems();
-        serverPortTextField.setText("1055");
+        serverPortTextField.setText("1025");
         serverIPTextField.setText("localhost");
 
         messages = messagesList.getItems();

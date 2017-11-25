@@ -62,12 +62,12 @@ public class Sender implements Runnable {
             message.content = AES.encrypt(message.content, sessionKey);
 
             // sign the message
-            Signature signature = Signature.getInstance("SHA1withDSA", "SUN");
+            Signature signer = Signature.getInstance("SHA1withRSA");
 
-            signature.initSign(privateKey);
-            signature.update(message.content);
+            signer.initSign(this.privateKey);
+            signer.update(message.content);
 
-            message.digitalSignature = signature.sign();
+            message.digitalSignature = signer.sign();
 
             ObjectOutputStream oos = new ObjectOutputStream(socket.getOutputStream());
             oos.writeObject(message);
@@ -77,7 +77,7 @@ public class Sender implements Runnable {
 
             socket.close();
 
-        } catch (IOException | NoSuchAlgorithmException | NoSuchProviderException | SignatureException | InvalidKeyException e) {
+        } catch (IOException | NoSuchAlgorithmException | SignatureException | InvalidKeyException e) {
             e.printStackTrace();
         }
     }

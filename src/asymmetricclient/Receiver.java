@@ -10,9 +10,6 @@ import javafx.collections.ObservableList;
 import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
 import javafx.stage.DirectoryChooser;
-import javafx.stage.FileChooser;
-import javafx.stage.Stage;
-import javafx.util.Pair;
 
 import java.io.File;
 import java.io.IOException;
@@ -20,7 +17,6 @@ import java.io.ObjectInputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.security.*;
-import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -98,19 +94,16 @@ public class Receiver extends Protocol.Receiver implements Runnable {
         byte[] decryptedContent = AES.decrypt(msg.content, sessionKey);
         String result = new String(decryptedContent);
 
-        Signature signature = null;
-        signature = Signature.getInstance("SHA1withDSA", "SUN");
+        Signature verifier = Signature.getInstance("SHA1withRSA");
 
-        assert signature != null;
-
-        PublicKey publicKey = pairKey.getPublic();
-        signature.initVerify(publicKey);
+        PublicKey publicKey = msg.sender.getPublicKey();
+        verifier.initVerify(publicKey);
         byte[] digitalSignature = msg.digitalSignature;
-        signature.update(decryptedContent);
+        verifier.update(msg.content);
 
-        boolean verified = signature.verify(digitalSignature);
-        String verificationRes = verified ? "Data verified." : "Cannot verify data.";
-        Platform.runLater(() -> messages.add(0, "" + msg.sender.getName() + ":  " + result + " Verification Status :" + verificationRes));
+        boolean verified = verifier.verify(digitalSignature);
+        String verificationRes = verified ? " - Data verified." : " - Cannot verify data.";
+        Platform.runLater(() -> messages.add(0, "" + msg.sender.getName() + ":  " + result + verificationRes));
     }
 
     @Override
