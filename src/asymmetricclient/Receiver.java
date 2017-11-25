@@ -126,17 +126,15 @@ public class Receiver extends Protocol.Receiver implements Runnable {
 
         byte[] decryptedContent = AES.decrypt(msg.content, sessionKey);
 
-        Signature signature = null;
-        signature = Signature.getInstance("SHA1withDSA", "SUN");
+        Signature verifier = Signature.getInstance("SHA1withRSA");
 
-        assert signature != null;
-        PublicKey publicKey = pairKey.getPublic();
-        signature.initVerify(publicKey);
+        PublicKey publicKey = msg.sender.getPublicKey();
+        verifier.initVerify(publicKey);
         byte[] digitalSignature = msg.digitalSignature;
-        signature.update(decryptedContent);
+        verifier.update(msg.content);
 
-        boolean verified = signature.verify(digitalSignature);
-        String verificationRes = verified ? "Data verified." : "Cannot verify data.";
+        boolean verified = verifier.verify(digitalSignature);
+        String verificationRes = verified ? " - Data verified." : " - Cannot verify data.";
 
 
         Platform.runLater(new Runnable() {
