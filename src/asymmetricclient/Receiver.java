@@ -94,15 +94,7 @@ public class Receiver extends Protocol.Receiver implements Runnable {
         byte[] decryptedContent = AES.decrypt(msg.content, sessionKey);
         String result = new String(decryptedContent);
 
-        Signature verifier = Signature.getInstance("SHA1withRSA");
-
-        PublicKey publicKey = msg.sender.getPublicKey();
-        verifier.initVerify(publicKey);
-        byte[] digitalSignature = msg.digitalSignature;
-        verifier.update(msg.content);
-
-        boolean verified = verifier.verify(digitalSignature);
-        String verificationRes = verified ? " - Data verified." : " - Cannot verify data.";
+        String verificationRes = Verify(msg) ? " - Data verified." : " - Cannot verify data.";
         Platform.runLater(() -> messages.add(0, "" + msg.sender.getName() + ":  " + result + verificationRes));
     }
 
@@ -126,6 +118,68 @@ public class Receiver extends Protocol.Receiver implements Runnable {
 
         byte[] decryptedContent = AES.decrypt(msg.content, sessionKey);
 
+        String verificationRes = Verify(msg) ? " - Data verified." : " - Cannot verify data.";
+
+
+        Platform.runLater(() -> {
+            messages.add("" + msg.sender.getName() + ":  File Received -->" + msg.filename + " Verification Status :" + verificationRes);
+
+            File receivedFile = fileManager.writeFile(msg.filename, decryptedContent);
+            Dialog<String> dialog = new Dialog<>();
+            dialog.setTitle("File Received ");
+            dialog.setHeaderText("You have received a new file From " + msg.sender.getName());
+            dialog.setResizable(false);
+
+
+            Button btnOpen = new Button("Open File");
+            btnOpen.setOnMouseClicked(event -> fileManager.openFile(receivedFile));
+
+            Button btnPath = new Button("Select Path");
+            Button btnSave = new Button("Save");
+
+            DirectoryChooser pathChooser = new DirectoryChooser();
+
+            final String[] path = {".\\"};
+            btnPath.setOnMouseClicked(event ->
+            {
+                File file = pathChooser.showDialog(dialog.getOwner());
+                path[0] = file.getPath();
+            });
+            System.out.println(path[0]);
+
+            PasswordField password = new PasswordField();
+            password.setPromptText("Enter Password");
+            btnSave.setOnMouseClicked(event -> {
+                        try {
+                            fileManager.writeEncryptedFile(fileManager.encryptFile(receivedFile, password.getText()), path[0]);
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                        alert.setTitle("Save");
+                        String s = "Successfully Saved in " + path[0];
+                        alert.setContentText(s);
+                        alert.show();
+                    }
+            );
+            GridPane grid = new GridPane();
+            grid.add(btnOpen, 2, 1);
+            grid.add(password, 1, 3);
+            grid.add(btnPath, 2, 3);
+            grid.add(btnSave, 3, 3);
+
+            dialog.getDialogPane().setContent(grid);
+
+            ButtonType buttonTypeOk = new ButtonType("Okay", ButtonBar.ButtonData.OK_DONE);
+            dialog.getDialogPane().getButtonTypes().add(buttonTypeOk);
+
+            dialog.showAndWait();
+
+        });
+
+    }
+
+    private boolean Verify(Message msg) throws NoSuchAlgorithmException, InvalidKeyException, SignatureException {
         Signature verifier = Signature.getInstance("SHA1withRSA");
 
         PublicKey publicKey = msg.sender.getPublicKey();
@@ -133,69 +187,7 @@ public class Receiver extends Protocol.Receiver implements Runnable {
         byte[] digitalSignature = msg.digitalSignature;
         verifier.update(msg.content);
 
-        boolean verified = verifier.verify(digitalSignature);
-        String verificationRes = verified ? " - Data verified." : " - Cannot verify data.";
-
-
-        Platform.runLater(new Runnable() {
-            @Override
-            public void run() {
-                messages.add("" + msg.sender.getName() + ":  File Received -->" + msg.filename + " Verification Status :" + verificationRes);
-
-                File receivedFile = fileManager.writeFile(msg.filename, decryptedContent);
-                Dialog<String> dialog = new Dialog<>();
-                dialog.setTitle("File Received ");
-                dialog.setHeaderText("You have received a new file From " + msg.sender.getName());
-                dialog.setResizable(false);
-
-
-                Button btnOpen = new Button("Open File");
-                btnOpen.setOnMouseClicked(event -> fileManager.openFile(receivedFile));
-
-                Button btnPath = new Button("Select Path");
-                Button btnSave = new Button("Save");
-
-                DirectoryChooser pathChooser = new DirectoryChooser();
-
-                final String[] path = {".\\"};
-                btnPath.setOnMouseClicked(event ->
-                {
-                    File file = pathChooser.showDialog(dialog.getOwner());
-                    path[0] = file.getPath();
-                });
-                System.out.println(path[0]);
-
-                PasswordField password = new PasswordField();
-                password.setPromptText("Enter Password");
-                btnSave.setOnMouseClicked(event -> {
-                            try {
-                                fileManager.writeEncryptedFile(fileManager.encryptFile(receivedFile, password.getText()), path[0]);
-                            } catch (IOException e) {
-                                e.printStackTrace();
-                            }
-                            Alert alert = new Alert(Alert.AlertType.INFORMATION);
-                            alert.setTitle("Save");
-                            String s = "Successfully Saved in " + path[0];
-                            alert.setContentText(s);
-                            alert.show();
-                        }
-                );
-                GridPane grid = new GridPane();
-                grid.add(btnOpen, 2, 1);
-                grid.add(password, 1, 3);
-                grid.add(btnPath, 2, 3);
-                grid.add(btnSave, 3, 3);
-
-                dialog.getDialogPane().setContent(grid);
-
-                ButtonType buttonTypeOk = new ButtonType("Okay", ButtonBar.ButtonData.OK_DONE);
-                dialog.getDialogPane().getButtonTypes().add(buttonTypeOk);
-
-                dialog.showAndWait();
-
-            }
-        });
-
+        return verifier.verify(digitalSignature);
     }
 
     @Override
