@@ -118,7 +118,7 @@ public class ClientController {
         serverPortTextField.setVisible(false);
     }
 
-    public void connect() throws InterruptedException {
+    public void connect() {
 
         showIndicator();
 
@@ -200,7 +200,7 @@ public class ClientController {
 
     }
 
-    public void decrypt() throws IOException {
+    public void decrypt() {
 
         // get the chosen file
         File file = getFile();
