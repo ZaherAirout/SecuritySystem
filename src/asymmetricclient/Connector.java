@@ -2,14 +2,12 @@ package asymmetricclient;
 
 import Protocol.Client;
 import Protocol.ConnectionMessage;
-import Protocol.Message;
 import javafx.collections.ObservableList;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
-import java.net.UnknownHostException;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
@@ -19,11 +17,11 @@ import java.util.logging.Logger;
 
 public class Connector implements Runnable {
 
+    private static Socket socketToCA;
     private final String serverIP;
     private final int serverPort;
     ObservableList<Client> clients;
     private Socket socket;
-    private static Socket socketToCA;
     private Client current;
     private KeyPair keyPair;
     private X509Certificate certificate;
@@ -52,46 +50,42 @@ public class Connector implements Runnable {
             // Generate Asymmetric Keys
             KeyPairGenerator kpg = KeyPairGenerator.getInstance("RSA");
             kpg.initialize(1024);
-//            keyPair = RSA.generateKeys();
             keyPair = kpg.generateKeyPair();
 
-
             /* Create a Certificate */
-
             ObjectInputStream input = null;
             ObjectOutputStream output = null;
 
-            try {
+            /*try {
                 socketToCA = new Socket("localhost", 20000);
                 output = new ObjectOutputStream(socketToCA.getOutputStream());
                 input = new ObjectInputStream(socketToCA.getInputStream());
             } catch (IOException ex) {
                 Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
             }
-            /* Check if input and outPut isn't null*/
+            *//* Check if input and outPut isn't null*//*
             assert output != null;
             assert input != null;
-
             send(current, output);
             send(keyPair.getPublic(), output);
             certificate = (X509Certificate) receive(input);
+*/
 
 
             socket = new Socket(serverIP, serverPort);
             // send connection message
-            Message message = new ConnectionMessage();
+            ConnectionMessage message = new ConnectionMessage();
 
+            current.publicKey = keyPair.getPublic();
             message.receiver = null;
-            message.sender = current;
-            message.sender.publicKey = keyPair.getPublic();
+            message.sender = new Client(current);
+            message.setPublicKey(keyPair.getPublic());
+            current.setSocket(socket);
 
             // Write message to output stream
             ObjectOutputStream oos = new ObjectOutputStream(socket.getOutputStream());
             oos.writeObject(message);
             oos.flush();
-
-            socket.close();
-
         } catch (IOException | NoSuchAlgorithmException e) {
             e.printStackTrace();
         }

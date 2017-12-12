@@ -8,7 +8,9 @@ import Protocol.FileMessage;
 import Protocol.TextMessage;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.geometry.Insets;
 import javafx.scene.control.*;
+import javafx.scene.layout.GridPane;
 import javafx.stage.FileChooser;
 
 import java.io.File;
@@ -19,9 +21,10 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.security.Key;
 import java.security.KeyPair;
+import java.security.PublicKey;
 import java.security.cert.X509Certificate;
+import java.util.HashMap;
 import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -39,16 +42,14 @@ public class ClientController {
 
     private Client currentClient = null;
 
-    private ConcurrentHashMap<Client, Key> sessionKeys;
 
     private ObservableList<Client> clients;
-    private String serverIP;
-    private int serverPort;
-
 
     private KeyPair keyPair;
     private ObservableList<String> messages;
     private X509Certificate certificate;
+    private volatile HashMap<Client, PublicKey> publicKeys;
+    private volatile HashMap<Client, Key> sessionKeys;
 
 
     public X509Certificate getCertificate() {
@@ -70,7 +71,11 @@ public class ClientController {
 
     @FXML
     public void initialize() {
-        sessionKeys = new ConcurrentHashMap<>();
+
+        CreateClient();
+
+        sessionKeys = new HashMap<>();
+        publicKeys = new HashMap<>();
 
         clients = clientsListView.getItems();
         serverPortTextField.setText("1025");
@@ -78,6 +83,32 @@ public class ClientController {
 
         messages = messagesList.getItems();
         clientsListView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
+    }
+
+    private void CreateClient() {
+        Dialog<String> dialog = new Dialog<>();
+        dialog.getDialogPane().getStylesheets().clear();
+        dialog.getDialogPane().getStylesheets().add("Styles/style.css");
+
+        dialog.setTitle("Client Name");
+
+        ButtonType doneButton = new ButtonType("OK", ButtonBar.ButtonData.OK_DONE);
+        dialog.getDialogPane().getButtonTypes().addAll(doneButton);
+
+        GridPane gridPane = new GridPane();
+        gridPane.setHgap(10);
+        gridPane.setVgap(10);
+        gridPane.setPadding(new Insets(20, 150, 10, 10));
+
+        Label label = new Label("Name: ");
+        gridPane.add(label, 0, 0);
+        TextField name = new TextField();
+        name.setPromptText("Name");
+        gridPane.add(name, 1, 0);
+        dialog.setResizable(false);
+        dialog.getDialogPane().setContent(gridPane);
+        dialog.showAndWait();
+        this.currentClient = new Client(name.getText(), null);
     }
 
     /***
@@ -92,13 +123,13 @@ public class ClientController {
 
         for (Client receiver : selectedItems) {
 
-            Sender sender = new Sender(sessionKeys, keyPair.getPrivate(), serverIP, serverPort);
+            Sender sender = new Sender(this.sessionKeys, keyPair.getPrivate(), currentClient.getSocket());
 
             // create text message
             TextMessage message = new TextMessage();
 
-            message.sender = currentClient;
-            message.receiver = receiver;
+            message.sender = new Client(currentClient);
+            message.receiver = new Client(receiver);
 
             message.content = msg.getText().getBytes();
             sender.setMessage(message);
@@ -134,15 +165,12 @@ public class ClientController {
 
         // Receive and Handle messages async
         try {
-            Receiver receiver = new Receiver(currentClient, getKeyPair(), sessionKeys, clients, messages);
+            Receiver receiver = new Receiver(currentClient, getKeyPair(), this.sessionKeys, clients, messages);
             executorService.execute(receiver);
 
         } catch (IOException e) {
             e.printStackTrace();
         }
-
-        serverIP = serverIPTextField.getText();
-        serverPort = Integer.parseInt(serverPortTextField.getText());
     }
 
     public void setClient(Client client) {
@@ -180,7 +208,8 @@ public class ClientController {
             return;
 
         for (Client receiver : selectedItems) {
-            Sender sender = new Sender(sessionKeys, keyPair.getPrivate(), serverIP, serverPort);
+
+            Sender sender = new Sender(this.sessionKeys, keyPair.getPrivate(), currentClient.getSocket());
 
             // create text message
             FileMessage message = new FileMessage();
@@ -244,5 +273,13 @@ public class ClientController {
         // setup and get the file
         FileChooser fileChooser = new FileChooser();
         return fileChooser.showOpenDialog(serverIPTextField.getScene().getWindow());
+    }
+
+    public HashMap<Client, Key> getSessionKeys() {
+        return sessionKeys;
+    }
+
+    public HashMap<Client, PublicKey> getPublicKeys() {
+        return publicKeys;
     }
 }

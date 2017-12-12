@@ -1,11 +1,11 @@
 package Protocol;
 
-import java.util.List;
+import java.util.ArrayList;
 
 public class UpdateClientsMessage extends Message {
-    public List<Client> clients;
+    public ArrayList<Client> clients;
 
-    public UpdateClientsMessage(List<Client> clients) {
+    public UpdateClientsMessage(ArrayList<Client> clients) {
         this.clients = clients;
     }
 }

@@ -1,31 +1,39 @@
 package Protocol;
 
 import java.io.Serializable;
+import java.net.Socket;
 import java.security.PublicKey;
 
 public class Client implements Serializable {
-    public final int port;
     public PublicKey publicKey;
-    public String IP;
     private String name;
+    private Socket socket;
 
-    public Client(String name, String IP, int port, PublicKey publicKey) {
+    public Client(String name, PublicKey publicKey) {
         this.name = name;
-        this.IP = IP;
         this.publicKey = publicKey;
-        this.port = port;
+    }
+
+    public Client(String name) {
+        this.name = name;
+        this.publicKey = null;
+    }
+
+    public Client(Client other) {
+        this.name = other.getName();
+        this.publicKey = other.publicKey;
     }
 
     @Override
     public int hashCode() {
-        return (name + IP).hashCode();
+        return name.hashCode();
     }
 
     @Override
     public boolean equals(Object obj) {
         if (obj instanceof Client) {
             Client client = (Client) obj;
-            return this.name.equals(client.name) && this.IP.equals(client.IP) && this.port == client.port;
+            return this.name.equals(client.name);
         }
         return super.equals(obj);
     }
@@ -40,8 +48,14 @@ public class Client implements Serializable {
 
     @Override
     public String toString() {
-        return name + "-" + IP + ":" + port;
+        return name;
     }
 
+    public Socket getSocket() {
+        return socket;
+    }
 
+    public void setSocket(Socket socket) {
+        this.socket = socket;
+    }
 }

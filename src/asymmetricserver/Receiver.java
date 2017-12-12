@@ -9,26 +9,24 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.security.KeyException;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.security.SignatureException;
+import java.security.*;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class Receiver extends Protocol.Receiver implements Runnable {
 
     private final int nThreads = 4;
-    private Client sender;
+    HashMap<String, PublicKey> publicKeys;
     private ServerSocket serverSocket;
-    private Socket socket;
     private ExecutorService executorService;
 
-    public Receiver(ServerSocket serverSocket, ObservableList<Client> clients) {
+    public Receiver(ServerSocket serverSocket, ObservableList<Item> clients, HashMap<String, PublicKey> publicKeys) {
         super(clients);
         this.serverSocket = serverSocket;
         executorService = Executors.newFixedThreadPool(nThreads);
+        this.publicKeys = publicKeys;
     }
 
     @Override
@@ -39,13 +37,16 @@ public class Receiver extends Protocol.Receiver implements Runnable {
 
                 executorService.execute(() -> {
                     try {
-                        // read the message
-                        ObjectInputStream ois = new ObjectInputStream(socket.getInputStream());
-                        Message message = (Message) ois.readObject();
-                        ois.close();
-                        socket.close();
-                        // execute the specific task depending on the type of the message
-                        execute(message);
+                        while (true) {
+                            // read the message
+                            ObjectInputStream ois = new ObjectInputStream(socket.getInputStream());
+                            Message message = (Message) ois.readObject();
+
+                            if (message.receiver != null)
+                                message.receiver.publicKey = publicKeys.get(message.receiver.getName());
+                            // execute the specific task depending on the type of the message
+                            execute(message, socket);
+                        }
                     } catch (IOException | KeyException | ClassNotFoundException | NoSuchAlgorithmException | SignatureException | NoSuchProviderException e) {
                         e.printStackTrace();
                     }
@@ -60,77 +61,103 @@ public class Receiver extends Protocol.Receiver implements Runnable {
     }
 
     @Override
-    public void execute(ConnectionMessage msg) throws IOException {
-        this.sender = msg.sender;
+    public void execute(ConnectionMessage receivedMsg, Socket socket) throws IOException {
+        Client sender = receivedMsg.sender;
 
-        ArrayList<Client> list = new ArrayList<Client>();
-        list.addAll(clients);
-        list.add(this.sender);
+        ArrayList<Item> clients = new ArrayList<>();
+        clients.addAll(this.clients);
+        clients.add(new Item(sender, socket));
+        publicKeys.put(sender.getName(), receivedMsg.getPublicKey());
 
-        Platform.runLater(() -> clients.add(this.sender));
+        Platform.runLater(() -> this.clients.add(new Item(sender, socket)));
 
-        // new connection, so update GUI for every connected client
-        for (Client client : list) {
-            // connect to client
-            Socket socket = new Socket(client.IP, client.port);
-            // create update message
-            UpdateClientsMessage message = new UpdateClientsMessage(list);
-            // send the message
-            ObjectOutputStream oos = new ObjectOutputStream(socket.getOutputStream());
-            oos.writeObject(message);
-            oos.flush();
-            // close the connection
-            socket.close();
+        ArrayList<Client> onlineClients = new ArrayList<>();
+        for (Object object : clients) {
+            Client client = ((Item) object).getClient();
+            client.publicKey = publicKeys.get(client.getName());
+            onlineClients.add(client);
         }
+        // create update newMsg
+        UpdateClientsMessage newMsg = new UpdateClientsMessage(onlineClients);
+        System.out.println(receivedMsg.sender.getName());
+        ObjectOutputStream oos = new ObjectOutputStream(socket.getOutputStream());
+        oos.writeObject(newMsg);
+        oos.flush();
+
+        System.out.println("sending list to clients");
+        // new connection, so update GUI for every connected client
+        for (Object object : clients) {
+            Item item = (Item) object;
+            System.out.println("Client name: " + item.getClient().getName());
+            Socket clientSocket = item.getSocket();
+            // send the newMsg
+            oos = new ObjectOutputStream(clientSocket.getOutputStream());
+            oos.writeObject(newMsg);
+            oos.flush();
+        }
+        System.out.println("done");
     }
 
     @Override
-    public void execute(TextMessage msg) throws IOException, ClassNotFoundException, KeyException {
+    public void execute(TextMessage msg, Socket socket) throws IOException, ClassNotFoundException, KeyException {
+        forwardToReceiver(msg);
+    }
 
+    @Override
+    public void execute(FileMessage msg, Socket socket) throws KeyException, IOException {
+        forwardToReceiver(msg);
+    }
+
+    private void forwardToReceiver(Message msg) throws IOException {
         Client receiver = msg.receiver;
 
+        Socket clientSocket = ((ObservableList<Item>) clients).filtered(item -> item.getClient().equals(receiver)).get(0).getSocket();
+
+        if (clientSocket == null) {
+            System.out.println("Not found");
+            return;
+        }
+
         // Connect to the receiver
-        Socket socket = new Socket(receiver.IP, receiver.port);
-        ObjectOutputStream oos = new ObjectOutputStream(socket.getOutputStream());
+        ObjectOutputStream oos = new ObjectOutputStream(clientSocket.getOutputStream());
         // send the message
         oos.writeObject(msg);
         oos.flush();
-
-        // close the connection
-        socket.close();
     }
 
     @Override
-    public void execute(FileMessage msg) throws KeyException, IOException {
-        Client receiver = msg.receiver;
-
-        // Connect to the receiver
-        Socket socket = new Socket(receiver.IP, receiver.port);
-        ObjectOutputStream oos = new ObjectOutputStream(socket.getOutputStream());
-        // send the message
-        oos.writeObject(msg);
-        oos.flush();
-
-        // close the connection
-        socket.close();
+    public void execute(CheckOnlineMessage msg, Socket socket) {
 
     }
 
     @Override
-    public void execute(CheckOnlineMessage msg) {
-
-    }
-
-    @Override
-    public void execute(CloseConnectionMessage msg) {
+    public void execute(CloseConnectionMessage msg, Socket socket) {
         Client sender = msg.sender;
 
         Platform.runLater(() -> clients.remove(sender));
     }
 
     @Override
-    public void execute(UpdateClientsMessage message) {
+    public void execute(UpdateClientsMessage message, Socket socket) {
 
+    }
+
+    @Override
+    public void execute(PKMessage message, Socket socket) {
+        /*Client receiver = message.receiver;
+
+        PublicKey publicKey = publicKeys.get(receiver.getName());
+
+        try {
+            ObjectOutputStream oos = new ObjectOutputStream(socket.getOutputStream());
+            message.setPublicKey(publicKey);
+
+            oos.writeObject(message);
+            oos.flush();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+*/
     }
 
 }

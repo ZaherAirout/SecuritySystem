@@ -12,32 +12,35 @@ import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.security.*;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.HashMap;
 
 public class Sender implements Runnable {
-    private final ConcurrentHashMap<Client, Key> sessionKeys;
+    private HashMap<Client, Key> sessionKeys;
     private Message message;
-    private String serverIP;
-    private int serverPort;
     private PrivateKey privateKey;
+    private Socket socket;
 
-    Sender(ConcurrentHashMap<Client, Key> sessionKeys,PrivateKey privateKey, String serverIP, int serverPort) {
+    Sender(HashMap<Client, Key> sessionKeys, PrivateKey privateKey, Socket socket) {
         this.sessionKeys = sessionKeys;
-        this.serverIP = serverIP;
-        this.serverPort = serverPort;
         this.privateKey = privateKey;
+        this.socket = socket;
     }
 
     @Override
     public void run() {
 
         try {
-            Socket socket = new Socket(serverIP, serverPort);
+//            Socket socket = new Socket(serverIP, serverPort);
 
             Logger logger = new Logger("./log.txt");
             logger.start();
 
             Client receiver = message.receiver;
+            message.receiver.setSocket(null);
+            message.sender.setSocket(null);
+
+//            message.receiver = new Client(message.receiver);
+//            message.sender = new Client(message.sender);
 
             // get Session key if exists, or create new one
             Key sessionKey = null;
@@ -47,15 +50,15 @@ public class Sender implements Runnable {
             message.sessionKey = null;
 
             if (sessionKey == null) {
+
+                PublicKey publicKey = message.receiver.publicKey;
+
                 // Create session key using AES
                 sessionKey = AES.generateKey();
 
-                // Store session key for late usage.
-                assert sessionKey != null;
-                sessionKeys.put(receiver, sessionKey);
-
                 // Encrypt session key using RSA asymmetric algorithm
-                message.sessionKey = RSA.encrypt(sessionKey.getEncoded(), message.receiver.getPublicKey());
+                message.sessionKey = RSA.encrypt(sessionKey.getEncoded(), publicKey);
+                sessionKeys.put(receiver, sessionKey);
             }
 
             // Encrypt content using AES symmetric algorithm
@@ -74,8 +77,6 @@ public class Sender implements Runnable {
             oos.flush();
 
             logger.stop("Sending Message ");
-
-            socket.close();
 
         } catch (IOException | NoSuchAlgorithmException | SignatureException | InvalidKeyException e) {
             e.printStackTrace();

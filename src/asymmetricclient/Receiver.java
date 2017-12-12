@@ -14,69 +14,54 @@ import javafx.stage.DirectoryChooser;
 import java.io.File;
 import java.io.IOException;
 import java.io.ObjectInputStream;
-import java.net.ServerSocket;
 import java.net.Socket;
 import java.security.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.HashMap;
 
 public class Receiver extends Protocol.Receiver implements Runnable {
-    private final ConcurrentHashMap<Client, Key> sessionKeys;
+    private final HashMap<Client, Key> sessionKeys;
     private final ObservableList<String> messages;
-    private final ExecutorService executorService;
-    private final int nThread = 4;
-    private ServerSocket serverSocket;
     private Client currentClient;
     private KeyPair pairKey;
 
-    Receiver(Client currentClient, KeyPair pairKey, ConcurrentHashMap<Client, Key> sessionKeys, ObservableList<Client> clients, ObservableList<String> messages) throws IOException {
+    Receiver(Client currentClient, KeyPair pairKey, HashMap<Client, Key> sessionKeys, ObservableList<Client> clients, ObservableList<String> messages) throws IOException {
         super(clients);
 
         this.sessionKeys = sessionKeys;
-        this.serverSocket = new ServerSocket(currentClient.port);
         this.currentClient = currentClient;
         this.pairKey = pairKey;
         this.messages = messages;
-        this.executorService = Executors.newFixedThreadPool(nThread);
     }
 
     @Override
     public void run() {
+        Socket socket = currentClient.getSocket();
+        ObjectInputStream ois = null;
         while (true) {
             try {
-                Socket socket = serverSocket.accept();
+                Logger logger = new Logger("./log.txt");
+                logger.start();
 
-                executorService.execute(() -> {
-                    try {
-                        Logger logger = new Logger("./log.txt");
-                        logger.start();
+                ois = new ObjectInputStream(socket.getInputStream());
 
-                        ObjectInputStream ois = new ObjectInputStream(socket.getInputStream());
-                        Message msg = (Message) ois.readObject();
+                Message msg = (Message) ois.readObject();
 
+                execute(msg, socket);
 
-                        execute(msg);
+                logger.stop("Receiving message ");
 
-                        logger.stop("Receiving message ");
-                    } catch (IOException | ClassNotFoundException | KeyException | NoSuchAlgorithmException | SignatureException | NoSuchProviderException e) {
-                        e.printStackTrace();
-                    }
-                });
-
-            } catch (IOException e) {
-                e.printStackTrace();
+            } catch (IOException | ClassNotFoundException | NoSuchAlgorithmException | KeyException | SignatureException | NoSuchProviderException e) {
             }
         }
     }
 
     @Override
-    public void execute(ConnectionMessage msg) throws IOException {
+    public void execute(ConnectionMessage msg, Socket socket) throws IOException {
 
     }
 
     @Override
-    public void execute(TextMessage msg) throws IOException, ClassNotFoundException, KeyException, SignatureException, NoSuchProviderException, NoSuchAlgorithmException {
+    public void execute(TextMessage msg, Socket socket) throws IOException, ClassNotFoundException, KeyException, SignatureException, NoSuchProviderException, NoSuchAlgorithmException {
 
         Key sessionKey = null;
 
@@ -99,7 +84,7 @@ public class Receiver extends Protocol.Receiver implements Runnable {
     }
 
     @Override
-    public void execute(FileMessage msg) throws KeyException, NoSuchProviderException, NoSuchAlgorithmException, SignatureException {
+    public void execute(FileMessage msg, Socket socket) throws KeyException, NoSuchProviderException, NoSuchAlgorithmException, SignatureException {
         Key sessionKey = null;
 
         byte[] sessionKeyArr = msg.sessionKey;
@@ -191,21 +176,42 @@ public class Receiver extends Protocol.Receiver implements Runnable {
     }
 
     @Override
-    public void execute(CheckOnlineMessage msg) {
+    public void execute(CheckOnlineMessage msg, Socket socket) {
 
     }
 
     @Override
-    public void execute(CloseConnectionMessage msg) {
+    public void execute(CloseConnectionMessage msg, Socket socket) {
         throw new UnsupportedOperationException("Close Connection Message must not be sent to clients.");
     }
 
     @Override
-    public void execute(UpdateClientsMessage msg) {
+    public void execute(UpdateClientsMessage msg, Socket socket) {
+        System.out.println("Client " + currentClient.getName() + " is receiving list of the new clients");
+        for (Client client : msg.clients) {
+            System.out.println(client.getName());
+        }
+        System.out.println("done");
         Platform.runLater(() -> {
             clients.clear();
             msg.clients.removeIf(client -> client.equals(currentClient));
-            clients.addAll(msg.clients);
+            ((ObservableList<Client>) clients).addAll(msg.clients);
         });
+    }
+
+    @Override
+    public void execute(PKMessage message, Socket socket) {
+
+/*
+        PublicKey receiverPK = message.getPublicKey();
+        Client receiver = message.receiver;
+
+        // Create session key using AES
+        Key sessionKey = AES.generateKey();
+
+        // Store session key for late usage.
+        assert sessionKey != null;
+        sessionKeys.put(receiver, sessionKey);
+*/
     }
 }

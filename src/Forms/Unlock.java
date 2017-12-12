@@ -12,7 +12,6 @@ import javafx.scene.Scene;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 
-import java.net.InetAddress;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -38,7 +37,7 @@ public class Unlock extends Application {
     public void start(Stage primaryStage) {
         try {
             String filename = "Unlock.fxml";
-            Pane page = (Pane) FXMLLoader.load(Unlock.class.getResource(filename));
+            Pane page = FXMLLoader.load(Unlock.class.getResource(filename));
             Scene scene = new Scene(page);
 
             scene.getStylesheets().clear();
@@ -46,7 +45,7 @@ public class Unlock extends Application {
 
             primaryStage.setScene(scene);
             primaryStage.setOnHidden(event -> Platform.exit());
-            primaryStage.setTitle("Server - " + InetAddress.getLocalHost().getHostAddress() + ":" + ServerController.PORT);
+            primaryStage.setTitle("Server : " + ServerController.PORT);
 
             primaryStage.show();
         } catch (Exception ex) {
