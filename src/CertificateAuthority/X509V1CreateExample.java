@@ -26,6 +26,7 @@ import static serverchatclient.EncryptionUtil.generateKey;
 /**
  * Basic X.509 V1 Certificate creation.
  */
+
 public class X509V1CreateExample {
 
     public static X509Certificate generateV1Certificate(PublicKey PK, PrivateKey PVK, String Name)

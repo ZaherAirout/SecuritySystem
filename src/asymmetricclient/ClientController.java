@@ -19,6 +19,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.security.Key;
 import java.security.KeyPair;
+import java.security.cert.X509Certificate;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
@@ -47,6 +48,16 @@ public class ClientController {
 
     private KeyPair keyPair;
     private ObservableList<String> messages;
+    private X509Certificate certificate;
+
+
+    public X509Certificate getCertificate() {
+        return certificate;
+    }
+
+    public void setCertificate(X509Certificate certificate) {
+        this.certificate = certificate;
+    }
 
     private KeyPair getKeyPair() {
         return keyPair;
@@ -117,6 +128,7 @@ public class ClientController {
         connector.run();
 
         setKeyPair(connector.getKeyPair());
+        setCertificate(connector.getCertificate());
 
         hideIndicator();
 
@@ -124,6 +136,7 @@ public class ClientController {
         try {
             Receiver receiver = new Receiver(currentClient, getKeyPair(), sessionKeys, clients, messages);
             executorService.execute(receiver);
+
         } catch (IOException e) {
             e.printStackTrace();
         }
