@@ -2,7 +2,8 @@ package asymmetricclient;
 
 import Misc.FileManager;
 import Misc.Logger;
-import Protocol.*;
+import Protocol.Client;
+import Protocol.Messages.*;
 import crypto.AES;
 import crypto.RSA;
 import javafx.application.Platform;

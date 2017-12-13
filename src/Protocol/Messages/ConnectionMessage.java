@@ -1,4 +1,4 @@
-package Protocol;
+package Protocol.Messages;
 
 import java.security.PublicKey;
 

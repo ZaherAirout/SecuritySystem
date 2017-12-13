@@ -2,9 +2,9 @@ package asymmetricclient;
 
 import Misc.Logger;
 import Protocol.Client;
-import Protocol.FileMessage;
-import Protocol.Message;
-import Protocol.TextMessage;
+import Protocol.Messages.FileMessage;
+import Protocol.Messages.Message;
+import Protocol.Messages.TextMessage;
 import crypto.AES;
 import crypto.RSA;
 

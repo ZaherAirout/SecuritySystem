@@ -1,6 +1,7 @@
 package asymmetricserver;
 
-import Protocol.*;
+import Protocol.Client;
+import Protocol.Messages.*;
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
 

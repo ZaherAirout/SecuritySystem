@@ -1,5 +1,6 @@
 package Protocol;
 
+import Protocol.Messages.*;
 import javafx.collections.ObservableList;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 

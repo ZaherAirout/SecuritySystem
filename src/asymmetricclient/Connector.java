@@ -1,7 +1,7 @@
 package asymmetricclient;
 
 import Protocol.Client;
-import Protocol.ConnectionMessage;
+import Protocol.Messages.ConnectionMessage;
 import javafx.collections.ObservableList;
 
 import java.io.IOException;

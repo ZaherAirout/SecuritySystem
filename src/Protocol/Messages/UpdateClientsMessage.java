@@ -1,4 +1,6 @@
-package Protocol;
+package Protocol.Messages;
+
+import Protocol.Client;
 
 import java.util.ArrayList;
 
