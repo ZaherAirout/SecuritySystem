@@ -53,33 +53,31 @@ public class Connector implements Runnable {
             keyPair = kpg.generateKeyPair();
 
             /* Create a Certificate */
-            ObjectInputStream input = null;
-            ObjectOutputStream output = null;
-
-            /*try {
+            try {
                 socketToCA = new Socket("localhost", 20000);
-                output = new ObjectOutputStream(socketToCA.getOutputStream());
-                input = new ObjectInputStream(socketToCA.getInputStream());
+                ObjectOutputStream output = new ObjectOutputStream(socketToCA.getOutputStream());
+                send(current, output);
+                send(keyPair.getPublic(), output);
+
+                ObjectInputStream input = new ObjectInputStream(socketToCA.getInputStream());
+
+                certificate = (X509Certificate) receive(input);
+
             } catch (IOException ex) {
+                System.err.println("***************   Certificate Authority Server issue    ***************");
                 Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
             }
-            *//* Check if input and outPut isn't null*//*
-            assert output != null;
-            assert input != null;
-            send(current, output);
-            send(keyPair.getPublic(), output);
-            certificate = (X509Certificate) receive(input);
-*/
-
 
             socket = new Socket(serverIP, serverPort);
             // send connection message
             ConnectionMessage message = new ConnectionMessage();
 
-            current.publicKey = keyPair.getPublic();
+//            current.publicKey = keyPair.getPublic();
+            current.certificate = certificate;
+            message.setCertificate(certificate);
             message.receiver = null;
             message.sender = new Client(current);
-            message.setPublicKey(keyPair.getPublic());
+//            message.setPublicKey(keyPair.getPublic());
             current.setSocket(socket);
 
             // Write message to output stream

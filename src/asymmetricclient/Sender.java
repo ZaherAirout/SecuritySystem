@@ -50,8 +50,8 @@ public class Sender implements Runnable {
             message.sessionKey = null;
 
             if (sessionKey == null) {
-
-                PublicKey publicKey = message.receiver.publicKey;
+                PublicKey publicKey = message.receiver.certificate.getPublicKey();
+//                PublicKey publicKey = null;
 
                 // Create session key using AES
                 sessionKey = AES.generateKey();

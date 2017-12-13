@@ -3,25 +3,26 @@ package Protocol;
 import java.io.Serializable;
 import java.net.Socket;
 import java.security.PublicKey;
+import java.security.cert.Certificate;
 
 public class Client implements Serializable {
-    public PublicKey publicKey;
     private String name;
     private Socket socket;
+    public Certificate certificate;
 
-    public Client(String name, PublicKey publicKey) {
+    public Client(String name, Certificate certificate) {
         this.name = name;
-        this.publicKey = publicKey;
+        this.certificate = certificate;
     }
 
     public Client(String name) {
         this.name = name;
-        this.publicKey = null;
+        this.certificate = null;
     }
 
     public Client(Client other) {
         this.name = other.getName();
-        this.publicKey = other.publicKey;
+        this.certificate = other.certificate;
     }
 
     @Override
@@ -42,8 +43,8 @@ public class Client implements Serializable {
         return name;
     }
 
-    public PublicKey getPublicKey() {
-        return publicKey;
+    public Certificate getCertificate() {
+        return certificate;
     }
 
     @Override

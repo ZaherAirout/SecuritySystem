@@ -17,6 +17,9 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.net.Socket;
 import java.security.*;
+import java.security.cert.*;
+import java.security.cert.Certificate;
+import java.util.Date;
 import java.util.HashMap;
 
 public class Receiver extends Protocol.Receiver implements Runnable {
@@ -165,15 +168,33 @@ public class Receiver extends Protocol.Receiver implements Runnable {
 
     }
 
-    private boolean Verify(Message msg) throws NoSuchAlgorithmException, InvalidKeyException, SignatureException {
+    private boolean Verify(Message msg) throws NoSuchAlgorithmException, InvalidKeyException, SignatureException, NoSuchProviderException {
         Signature verifier = Signature.getInstance("SHA1withRSA");
-
-        PublicKey publicKey = msg.sender.getPublicKey();
+        X509Certificate certificate = (X509Certificate) msg.sender.certificate;
+        PublicKey publicKey = certificate.getPublicKey();
+        //TODO get CA PK
+        try {
+//            certificate.verify(null);
+            certificate.checkValidity(new Date());
+        } catch (CertificateExpiredException e) {
+            System.err.println("******************************************");
+            System.err.println("*********** Certificate Expired **********");
+            System.err.println("******************************************");
+        } catch (CertificateNotYetValidException e) {
+            System.err.println("******************************************");
+            System.err.println("*******Certificate NOT YET VALID**********");
+            System.err.println("******************************************");
+        } catch (CertificateException e) {
+            System.err.println("******************************************");
+            System.err.println("********Certificate not trusted***********");
+            System.err.println("******************************************");
+        }
         verifier.initVerify(publicKey);
         byte[] digitalSignature = msg.digitalSignature;
         verifier.update(msg.content);
 
         return verifier.verify(digitalSignature);
+
     }
 
     @Override

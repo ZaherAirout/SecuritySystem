@@ -1,15 +1,26 @@
 package Protocol.Messages;
 
 import java.security.PublicKey;
+import java.security.cert.Certificate;
 
 public class ConnectionMessage extends Message {
-    PublicKey publicKey;
+//    PublicKey publicKey;
+    Certificate certificate;
 
-    public PublicKey getPublicKey() {
-        return publicKey;
+
+    public void setCertificate(Certificate certificate) {
+        this.certificate = certificate;
     }
 
-    public void setPublicKey(PublicKey publicKey) {
-        this.publicKey = publicKey;
+    public Certificate getCertificate() {
+        return certificate;
     }
+
+//    public PublicKey getPublicKey() {
+//        return publicKey;
+//    }
+
+//    public void setPublicKey(PublicKey publicKey) {
+//        this.publicKey = publicKey;
+//    }
 }

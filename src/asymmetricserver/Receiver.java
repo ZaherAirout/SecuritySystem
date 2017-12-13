@@ -11,6 +11,7 @@ import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.security.*;
+import java.security.cert.Certificate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.concurrent.ExecutorService;
@@ -19,15 +20,17 @@ import java.util.concurrent.Executors;
 public class Receiver extends Protocol.Receiver implements Runnable {
 
     private final int nThreads = 4;
-    HashMap<String, PublicKey> publicKeys;
+    //    HashMap<String, PublicKey> publicKeys;
+    HashMap<String, Certificate> certificates;
     private ServerSocket serverSocket;
     private ExecutorService executorService;
 
-    public Receiver(ServerSocket serverSocket, ObservableList<Item> clients, HashMap<String, PublicKey> publicKeys) {
+    public Receiver(ServerSocket serverSocket, ObservableList<Item> clients, HashMap<String, Certificate> certificates) {
         super(clients);
         this.serverSocket = serverSocket;
         executorService = Executors.newFixedThreadPool(nThreads);
-        this.publicKeys = publicKeys;
+//        this.publicKeys = publicKeys;
+        this.certificates = certificates;
     }
 
     @Override
@@ -40,13 +43,17 @@ public class Receiver extends Protocol.Receiver implements Runnable {
                     try {
                         while (true) {
                             // read the message
+                            System.out.println("new Message");
                             ObjectInputStream ois = new ObjectInputStream(socket.getInputStream());
                             Message message = (Message) ois.readObject();
 
                             if (message.receiver != null)
-                                message.receiver.publicKey = publicKeys.get(message.receiver.getName());
+//                                TODO get receiver PK from Certificate
+//                                  message.receiver.publicKey = publicKeys.get(message.receiver.getName());
+                                message.receiver.certificate = certificates.get(message.receiver.getName());
                             // execute the specific task depending on the type of the message
                             execute(message, socket);
+
                         }
                     } catch (IOException | KeyException | ClassNotFoundException | NoSuchAlgorithmException | SignatureException | NoSuchProviderException e) {
                         e.printStackTrace();
@@ -63,19 +70,22 @@ public class Receiver extends Protocol.Receiver implements Runnable {
 
     @Override
     public void execute(ConnectionMessage receivedMsg, Socket socket) throws IOException {
-        Client sender = receivedMsg.sender;
 
+        Client sender = receivedMsg.sender;
+        System.out.println(sender);
         ArrayList<Item> clients = new ArrayList<>();
         clients.addAll(this.clients);
         clients.add(new Item(sender, socket));
-        publicKeys.put(sender.getName(), receivedMsg.getPublicKey());
+//        publicKeys.put(sender.getName(), receivedMsg.getPublicKey());
+        certificates.put(sender.getName(), receivedMsg.getCertificate());
 
         Platform.runLater(() -> this.clients.add(new Item(sender, socket)));
 
         ArrayList<Client> onlineClients = new ArrayList<>();
         for (Object object : clients) {
             Client client = ((Item) object).getClient();
-            client.publicKey = publicKeys.get(client.getName());
+//            client.publicKey = publicKeys.get(client.getName());
+            client.certificate = certificates.get(client.getName());
             onlineClients.add(client);
         }
         // create update newMsg
