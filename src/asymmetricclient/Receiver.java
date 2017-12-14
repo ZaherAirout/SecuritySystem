@@ -28,13 +28,18 @@ public class Receiver extends Protocol.Receiver implements Runnable {
     private Client currentClient;
     private KeyPair pairKey;
 
-    Receiver(Client currentClient, KeyPair pairKey, HashMap<Client, Key> sessionKeys, ObservableList<Client> clients, ObservableList<String> messages) throws IOException {
+    /* Certificate Authority PublicKey*/
+    private PublicKey CA_PK;
+
+
+    Receiver(Client currentClient, KeyPair pairKey, HashMap<Client, Key> sessionKeys, ObservableList<Client> clients, ObservableList<String> messages, PublicKey CA_PK) throws IOException {
         super(clients);
 
         this.sessionKeys = sessionKeys;
         this.currentClient = currentClient;
         this.pairKey = pairKey;
         this.messages = messages;
+        this.CA_PK = CA_PK;
     }
 
     @Override
@@ -174,7 +179,13 @@ public class Receiver extends Protocol.Receiver implements Runnable {
         PublicKey publicKey = certificate.getPublicKey();
         //TODO get CA PK
         try {
-//            certificate.verify(null);
+            if (CA_PK != null)
+                certificate.verify(CA_PK);
+            else {
+                System.err.println("******************************************");
+                System.err.println("***********UnKnown CA PublicKey**********");
+                System.err.println("******************************************");
+            }
             certificate.checkValidity(new Date());
         } catch (CertificateExpiredException e) {
             System.err.println("******************************************");

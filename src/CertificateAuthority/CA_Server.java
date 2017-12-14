@@ -68,6 +68,7 @@ public class CA_Server {
             // generate the certificate
             Security.addProvider(new BouncyCastleProvider());
             X509Certificate cert = X509V1CreateExample.generateV1Certificate(publicKey, pair.getPrivate(), user);
+            send(pair.getPublic());
             send(cert);
             certs.add(cert);
         }

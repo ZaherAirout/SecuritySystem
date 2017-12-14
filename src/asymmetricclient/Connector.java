@@ -11,6 +11,7 @@ import java.net.Socket;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
+import java.security.PublicKey;
 import java.security.cert.X509Certificate;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -25,6 +26,9 @@ public class Connector implements Runnable {
     private Client current;
     private KeyPair keyPair;
     private X509Certificate certificate;
+
+    /*Certificate Authority PublicKey*/
+    private PublicKey CA_PK;
 
 
     Connector(Client current, ObservableList<Client> clients, String serverIP, int serverPort) {
@@ -61,6 +65,7 @@ public class Connector implements Runnable {
 
                 ObjectInputStream input = new ObjectInputStream(socketToCA.getInputStream());
 
+                CA_PK = (PublicKey) receive(input);
                 certificate = (X509Certificate) receive(input);
 
             } catch (IOException ex) {
@@ -110,4 +115,8 @@ public class Connector implements Runnable {
     }
 
 
+    public PublicKey getCA_PK() {
+        return CA_PK;
+    }
 }
+

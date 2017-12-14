@@ -51,6 +51,8 @@ public class ClientController {
     private volatile HashMap<Client, PublicKey> publicKeys;
     private volatile HashMap<Client, Key> sessionKeys;
 
+    /* Certificate Authority PublicKey*/
+    private PublicKey CA_PK;
 
     public X509Certificate getCertificate() {
         return certificate;
@@ -62,6 +64,11 @@ public class ClientController {
 
     private KeyPair getKeyPair() {
         return keyPair;
+    }
+
+
+    public void setCA_PK(PublicKey CA_PK) {
+        this.CA_PK = CA_PK;
     }
 
     private void setKeyPair(KeyPair keyPair) {
@@ -160,12 +167,13 @@ public class ClientController {
 
         setKeyPair(connector.getKeyPair());
         setCertificate(connector.getCertificate());
+        setCA_PK(connector.getCA_PK());
 
         hideIndicator();
 
         // Receive and Handle messages async
         try {
-            Receiver receiver = new Receiver(currentClient, getKeyPair(), this.sessionKeys, clients, messages);
+            Receiver receiver = new Receiver(currentClient, getKeyPair(), this.sessionKeys, clients, messages, CA_PK);
             executorService.execute(receiver);
 
         } catch (IOException e) {
