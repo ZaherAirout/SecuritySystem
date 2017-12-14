@@ -48,7 +48,6 @@ public class Receiver extends Protocol.Receiver implements Runnable {
                             Message message = (Message) ois.readObject();
 
                             if (message.receiver != null)
-//                                TODO get receiver PK from Certificate
 //                                  message.receiver.publicKey = publicKeys.get(message.receiver.getName());
                                 message.receiver.certificate = certificates.get(message.receiver.getName());
                             // execute the specific task depending on the type of the message

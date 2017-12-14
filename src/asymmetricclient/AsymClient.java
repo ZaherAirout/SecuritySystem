@@ -28,7 +28,7 @@ public class AsymClient extends Application {
         try {
             String filename = "Client.fxml";
             Pane page = FXMLLoader.load(AsymClient.class.getResource(filename));
-            Scene scene = new Scene(page);
+            Scene scene = new Scene(page, 675, 400);
 
             scene.getStylesheets().clear();
             scene.getStylesheets().add("Styles/style.css");

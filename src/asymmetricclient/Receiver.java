@@ -177,7 +177,6 @@ public class Receiver extends Protocol.Receiver implements Runnable {
         Signature verifier = Signature.getInstance("SHA1withRSA");
         X509Certificate certificate = (X509Certificate) msg.sender.certificate;
         PublicKey publicKey = certificate.getPublicKey();
-        //TODO get CA PK
         try {
             if (CA_PK != null)
                 certificate.verify(CA_PK);
@@ -185,20 +184,27 @@ public class Receiver extends Protocol.Receiver implements Runnable {
                 System.err.println("******************************************");
                 System.err.println("***********UnKnown CA PublicKey**********");
                 System.err.println("******************************************");
+                showAlert("Warning", "UnKnown CA PublicKey");
             }
             certificate.checkValidity(new Date());
         } catch (CertificateExpiredException e) {
             System.err.println("******************************************");
             System.err.println("*********** Certificate Expired **********");
             System.err.println("******************************************");
+            showAlert("Warning", "Certificate Expired");
+
         } catch (CertificateNotYetValidException e) {
             System.err.println("******************************************");
             System.err.println("*******Certificate NOT YET VALID**********");
             System.err.println("******************************************");
+            showAlert("Warning", "Certificate NOT YET VALID");
+
+//            return false;
         } catch (CertificateException e) {
             System.err.println("******************************************");
             System.err.println("********Certificate not trusted***********");
             System.err.println("******************************************");
+            showAlert("Warning", "Certificate not trusted");
         }
         verifier.initVerify(publicKey);
         byte[] digitalSignature = msg.digitalSignature;
@@ -229,6 +235,16 @@ public class Receiver extends Protocol.Receiver implements Runnable {
             clients.clear();
             msg.clients.removeIf(client -> client.equals(currentClient));
             ((ObservableList<Client>) clients).addAll(msg.clients);
+        });
+    }
+
+    private void showAlert(String title, String text) {
+        Platform.runLater(() -> {
+
+            Alert alert = new Alert(Alert.AlertType.WARNING);
+            alert.setTitle(title);
+            alert.setContentText(text);
+            alert.show();
         });
     }
 
